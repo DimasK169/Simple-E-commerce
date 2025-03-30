@@ -1,4 +1,4 @@
-package com.flash_sale.app.dto.response;
+package com.user.app.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

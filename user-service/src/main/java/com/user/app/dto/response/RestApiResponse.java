@@ -1,4 +1,4 @@
-package com.flash_sale.app.dto.response;
+package com.user.app.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.flash_sale.app.dto.request;
+package com.user.app.dto.request;
 
 import lombok.Builder;
 import lombok.Data;

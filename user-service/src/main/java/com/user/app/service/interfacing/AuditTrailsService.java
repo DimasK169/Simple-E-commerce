@@ -1,8 +1,8 @@
-package com.flash_sale.app.service.Interface;
+package com.user.app.service.interfacing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.flash_sale.app.dto.request.AuditTrailsRequest;
-import com.flash_sale.app.dto.result.AuditTrailsResponse;
+import com.user.app.dto.request.AuditTrailsRequest;
+import com.user.app.dto.result.AuditTrailsResponse;
 
 public interface AuditTrailsService {
 
