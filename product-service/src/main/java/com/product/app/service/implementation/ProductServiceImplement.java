@@ -10,6 +10,8 @@ import com.product.app.entity.Product;
 import com.product.app.repository.ProductRepository;
 import com.product.app.service.interfacing.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +79,7 @@ public class ProductServiceImplement implements ProductService {
 
         Product product = Product.builder()
                 .productId(p.getProductId())
-                .productName(p.getProductName())
+                .productName(request.getProductName())
                 .productDescription(request.getProductDescription())
                 .productCategory(request.getProductCategory())
                 .productStock(request.getProductStock())
@@ -155,6 +157,15 @@ public class ProductServiceImplement implements ProductService {
                 .build());
 
         return response;
+    }
+
+    public RestApiResponse<Page<Product>> getAllProducts(int page, int size) {
+        Page<Product> pageData = productRepository.findAll(PageRequest.of(page, size));
+        return RestApiResponse.<Page<Product>>builder()
+                .code("200")
+                .message("Products retrieved successfully")
+                .data(pageData)
+                .build();
     }
 
     public Product getProductName(String productName){
