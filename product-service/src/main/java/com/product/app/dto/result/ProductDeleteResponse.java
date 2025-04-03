@@ -1,13 +1,8 @@
 package com.product.app.dto.result;
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.util.Date;
 
-@Data
-@Builder
-public class ProductUpdateResponse {
+public class ProductDeleteResponse {
     private String productName;
     private String productDescription;
     private String productCategory;
