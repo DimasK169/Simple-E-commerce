@@ -20,6 +20,9 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
     private String productName;
+    @Column(unique = true, nullable = false)
+    private String productCode;
+    private String productImage = "https://www.mon-site-bug.fr/uploads/products/default-product.png";
     private String productDescription;
     private String productCategory;
     private String productStock;

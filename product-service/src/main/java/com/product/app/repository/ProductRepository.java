@@ -12,8 +12,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query("Select p from Product p where p.productName=:productName")
-    Product findByProductName(@Param("productName") String productName);
-    Page<Product> findAll(Pageable pageable);
+    @Query("Select p from Product p where p.productCode=:productCode")
+    Product findByproductCode(@Param("productCode") String productCode);
+    boolean existsByProductCode(String productCode);
+    Page<Product> findAllByProductIsDeleteFalse(Pageable pageable);
+
 
 }

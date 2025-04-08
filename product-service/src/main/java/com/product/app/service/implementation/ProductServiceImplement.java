@@ -3,6 +3,7 @@ package com.product.app.service.implementation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.product.app.dto.request.AuditTrailsRequest;
 import com.product.app.dto.request.ProductRequest;
+import com.product.app.dto.request.ProductUpdateRequest;
 import com.product.app.dto.response.RestApiResponse;
 import com.product.app.dto.result.ProductCreateResponse;
 import com.product.app.dto.result.ProductUpdateResponse;
@@ -28,8 +29,13 @@ public class ProductServiceImplement implements ProductService {
 
     @Override
     public RestApiResponse<ProductCreateResponse> create(ProductRequest request) throws JsonProcessingException {
+        if (productRepository.existsByProductCode(request.getProductCode())) {
+            throw new IllegalArgumentException("Product code must be unique.");
+        }
         Product product = Product.builder()
                 .productName(request.getProductName())
+                .productCode(request.getProductCode())
+                .productImage(request.getProductImage())
                 .productDescription(request.getProductDescription())
                 .productCategory(request.getProductCategory())
                 .productStock(request.getProductStock())
@@ -45,6 +51,8 @@ public class ProductServiceImplement implements ProductService {
 
         ProductCreateResponse results = ProductCreateResponse.builder()
                 .productName(savedProduct.getProductName())
+                .productCode(savedProduct.getProductCode())
+                .productImage(savedProduct.getProductImage())
                 .productDescription(savedProduct.getProductDescription())
                 .productCategory(savedProduct.getProductCategory())
                 .productStock(savedProduct.getProductStock())
@@ -66,20 +74,20 @@ public class ProductServiceImplement implements ProductService {
                 .AtRequest(String.valueOf(request))
                 .AtResponse(String.valueOf(response))
                 .build());
-
         return response;
     }
 
     @Override
-    public RestApiResponse<ProductUpdateResponse> update(ProductRequest request, String productName) throws JsonProcessingException {
-        Product p = getProductName(productName);
+    public RestApiResponse<ProductUpdateResponse> update(ProductUpdateRequest request, String productCode) throws JsonProcessingException {
+        Product p = getProductCode(productCode);
         if (p == null){
-            throw  new IllegalArgumentException("Invalid Product Name");
+            throw  new IllegalArgumentException("Invalid Product Code");
         }
-
         Product product = Product.builder()
                 .productId(p.getProductId())
                 .productName(request.getProductName())
+                .productImage(request.getProductImage())
+                .productCode(p.getProductCode())
                 .productDescription(request.getProductDescription())
                 .productCategory(request.getProductCategory())
                 .productStock(request.getProductStock())
@@ -95,6 +103,7 @@ public class ProductServiceImplement implements ProductService {
 
         ProductUpdateResponse result = ProductUpdateResponse.builder()
                 .productName(saveProduct.getProductName())
+                .productImage(saveProduct.getProductImage())
                 .productDescription(saveProduct.getProductDescription())
                 .productCategory(saveProduct.getProductCategory())
                 .productStock(saveProduct.getProductStock())
@@ -122,27 +131,14 @@ public class ProductServiceImplement implements ProductService {
     }
 
     @Override
-    public RestApiResponse<ProductUpdateResponse> delete(String productName) throws JsonProcessingException {
-        Product product = getProductName(productName);
+    public RestApiResponse<ProductUpdateResponse> delete(String productCode) throws JsonProcessingException {
+        Product product = getProductCode(productCode);
         if(product == null){
             throw new IllegalArgumentException("Invalid product Name");
         }
 
         product.setUpdatedDate(new Date());
         product.setProductIsDelete(true);
-
-        Product saveProduct = productRepository.save(product);
-        ProductUpdateResponse result = ProductUpdateResponse.builder()
-                .productName(saveProduct.getProductName())
-                .productDescription(saveProduct.getProductDescription())
-                .productCategory(saveProduct.getProductCategory())
-                .productStock(saveProduct.getProductStock())
-                .productPrice(saveProduct.getProductPrice())
-                .productIsAvailable(saveProduct.getProductIsAvailable())
-                .productIsDelete(saveProduct.getProductIsDelete())
-                .updatedDate(new Date())
-                .createdBy(saveProduct.getCreatedBy())
-                .build();
 
         RestApiResponse<ProductUpdateResponse> response = new RestApiResponse<>();
         response.setCode(HttpStatus.NO_CONTENT.toString());
@@ -152,7 +148,7 @@ public class ProductServiceImplement implements ProductService {
                 .AtAction("Delete")
                 .AtDescription("Delete Product")
                 .AtDate(new Date())
-                .AtRequest(String.valueOf(productName))
+                .AtRequest(String.valueOf(productCode))
                 .AtResponse(String.valueOf(response))
                 .build());
 
@@ -160,7 +156,7 @@ public class ProductServiceImplement implements ProductService {
     }
 
     public RestApiResponse<Page<Product>> getAllProducts(int page, int size) {
-        Page<Product> pageData = productRepository.findAll(PageRequest.of(page, size));
+        Page<Product> pageData = productRepository.findAllByProductIsDeleteFalse(PageRequest.of(page, size));
         return RestApiResponse.<Page<Product>>builder()
                 .code("200")
                 .message("Products retrieved successfully")
@@ -168,9 +164,8 @@ public class ProductServiceImplement implements ProductService {
                 .build();
     }
 
-    public Product getProductName(String productName){
-        Product product = productRepository.findByProductName(productName);
-        return product;
+    public Product getProductCode(String productCode){
+        return productRepository.findByproductCode(productCode);
     }
 
 }

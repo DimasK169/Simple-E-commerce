@@ -9,6 +9,8 @@ import java.util.Date;
 @Builder
 public class ProductUpdateResponse {
     private String productName;
+    private String productCode;
+    private String productImage;
     private String productDescription;
     private String productCategory;
     private String productStock;

@@ -3,6 +3,7 @@ package com.product.app.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.product.app.dto.request.ProductRequest;
+import com.product.app.dto.request.ProductUpdateRequest;
 import com.product.app.dto.response.RestApiResponse;
 import com.product.app.dto.result.ProductCreateResponse;
 import com.product.app.dto.result.ProductUpdateResponse;
@@ -26,14 +27,14 @@ public class ProductController {
         return productService.create(productRequest);
     }
 
-    @PatchMapping("/{productName}")
-    public RestApiResponse<ProductUpdateResponse> updateProduct(@Valid @RequestBody ProductRequest request, @PathVariable String productName) throws JsonProcessingException {
-        return productService.update(request, productName);
+    @PatchMapping("/{productCode}")
+    public RestApiResponse<ProductUpdateResponse> updateProduct(@Valid @RequestBody ProductUpdateRequest request, @PathVariable String productCode) throws JsonProcessingException {
+        return productService.update(request, productCode);
     }
 
-    @DeleteMapping("/{productName}")
-    public RestApiResponse<ProductUpdateResponse> deleteProduct(@PathVariable String productName) throws JsonProcessingException {
-        return productService.delete(productName);
+    @DeleteMapping("/{productCode}")
+    public RestApiResponse<ProductUpdateResponse> deleteProduct(@PathVariable String productCode) throws JsonProcessingException {
+        return productService.delete(productCode);
     }
 
     @GetMapping
