@@ -32,6 +32,7 @@ public class ProductServiceImplement implements ProductService {
         if (productRepository.existsByProductCode(request.getProductCode())) {
             throw new IllegalArgumentException("Product code must be unique.");
         }
+        //TODO Throw Jika tidak valid
         Product product = Product.builder()
                 .productName(request.getProductName())
                 .productCode(request.getProductCode())

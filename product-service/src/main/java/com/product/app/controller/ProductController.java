@@ -21,9 +21,8 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    //TODO VALIDASI UNIQUE KEY
     @PostMapping("")
-    public RestApiResponse<ProductCreateResponse> createProduct(@Valid @RequestBody ProductRequest productRequest) throws JsonProcessingException {
+    public RestApiResponse<ProductCreateResponse> createProduct(@RequestBody @Valid  ProductRequest productRequest) throws JsonProcessingException {
         return productService.create(productRequest);
     }
 
