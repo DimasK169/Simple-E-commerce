@@ -26,11 +26,11 @@ public class ProductRequest {
 
     @JsonProperty("stock")
     @NotEmpty(message = "Product stock cannot be empty")
-    private String productStock;
+    private Integer productStock;
 
     @JsonProperty("price")
     @NotEmpty(message = "Product price cannot be empty")
-    private String productPrice;
+    private Integer productPrice;
 
     @JsonProperty("image")
     private String productImage;

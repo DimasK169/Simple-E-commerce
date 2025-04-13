@@ -1,7 +1,7 @@
 package com.product.app.controller;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.product.app.dto.request.ProductRequest;
 import com.product.app.dto.request.ProductUpdateRequest;
 import com.product.app.dto.response.RestApiResponse;
@@ -12,7 +12,12 @@ import com.product.app.service.interfacing.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/products")
@@ -21,14 +26,28 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @PostMapping("")
-    public RestApiResponse<ProductCreateResponse> createProduct(@RequestBody @Valid  ProductRequest productRequest) throws JsonProcessingException {
-        return productService.create(productRequest);
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RestApiResponse<ProductCreateResponse> createProduct(
+            @Valid @RequestParam("product") String productJson,
+            @RequestParam("image") MultipartFile imageFile
+    ) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ProductRequest productRequest = mapper.readValue(productJson, ProductRequest.class);
+
+        return productService.create(productRequest, imageFile);
     }
 
-    @PatchMapping("/{productCode}")
-    public RestApiResponse<ProductUpdateResponse> updateProduct(@Valid @RequestBody ProductUpdateRequest request, @PathVariable String productCode) throws JsonProcessingException {
-        return productService.update(request, productCode);
+    @PutMapping(value = "/{productCode}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RestApiResponse<ProductUpdateResponse> updateProduct(
+            @PathVariable String productCode,
+            @Valid @RequestParam("product") String productJson,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile
+    ) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        ProductUpdateRequest request = mapper.readValue(productJson, ProductUpdateRequest.class);
+
+        return productService.update(request, productCode, imageFile);
     }
 
     @DeleteMapping("/{productCode}")
@@ -39,6 +58,14 @@ public class ProductController {
     @GetMapping
     public RestApiResponse<Page<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return productService.getAllProducts(page, size);
+    }
+
+    @GetMapping("/search")
+    public RestApiResponse<Page<Product>> searchProducts(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return productService.searchProducts(keyword, PageRequest.of(page, size));
     }
 
 }

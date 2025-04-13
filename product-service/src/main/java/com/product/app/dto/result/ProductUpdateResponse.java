@@ -13,8 +13,8 @@ public class ProductUpdateResponse {
     private String productImage;
     private String productDescription;
     private String productCategory;
-    private String productStock;
-    private String productPrice;
+    private Integer productStock;
+    private Integer productPrice;
     private Boolean productIsAvailable;
     private String createdBy;
     private Date createdDate;

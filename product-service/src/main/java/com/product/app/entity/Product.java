@@ -21,15 +21,13 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
-    @NotEmpty
     private String productName;
-    @Column(unique = true, nullable = false)
     private String productCode;
-    private String productImage = "https://www.mon-site-bug.fr/uploads/products/default-product.png";
+    private String productImage;
     private String productDescription;
     private String productCategory;
-    private String productStock;
-    private String productPrice;
+    private Integer productStock;
+    private Integer productPrice;
     private Boolean productIsAvailable;
     private Boolean productIsDelete;
     private String createdBy;
