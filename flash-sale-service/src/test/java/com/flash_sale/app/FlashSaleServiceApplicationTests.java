@@ -1,10 +1,10 @@
-package com.product.app;
+package com.flash_sale.app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ProductServiceApplicationTests {
+class FlashSaleServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
