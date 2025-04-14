@@ -10,26 +10,37 @@ import java.util.Date;
 @Builder
 public class FlashSaleUpdateResponse {
 
-    @JsonProperty("FlashSale_Id")
-    private Long FsId;
     @JsonProperty("FlashSale_Name")
-    private String FsName;
+    private String fsName;
+
+    @JsonProperty("FlashSale_Code")
+    private String fsCode;
+
     @JsonProperty("FlashSale_Product")
-    private String FsProduct;
-    @JsonProperty("FlashSale_StartDate")
-    private Date FsStartDate;
-    @JsonProperty("FlashSale_EndDate")
-    private Date FsEndDate;
+    private String fsProduct;
+
     @JsonProperty("FlashSale_Discount")
-    private Double FsDiscount;
-    @JsonProperty("FlashSale_DiscountedPrice")
-    private Integer FsDiscountedPrice;
-    @JsonProperty("FlashSale_Status")
-    private String FsStatus;
+    private Double trxDiscount;
+
+    @JsonProperty("FlashSale_Price")
+    private Integer trxPrice;
+
+    @JsonProperty("FlashSale_StartDate")
+    private Date fsStartDate;
+
+    @JsonProperty("FlashSale_EndDate")
+    private Date fsEndDate;
+
     @JsonProperty("FlashSale_CreatedBy")
-    private String FsCreatedBy;
+    private String fsCreatedBy;
+
     @JsonProperty("FlashSale_UpdateDate")
-    private Date FsUpdateDate;
+    private Date fsUpdateDate;
+
     @JsonProperty("FlashSale_IsDelete")
-    private Boolean FsIsDelete;
+    private Boolean fsIsDelete;
+
+    @JsonProperty("Status")
+    private String status;
+
 }

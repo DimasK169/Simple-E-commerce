@@ -1,11 +1,10 @@
 package com.flash_sale.app.service.Implement;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.flash_sale.app.configuration.ConfigurationBean;
 import com.flash_sale.app.dto.request.AuditTrailsRequest;
 import com.flash_sale.app.dto.result.AuditTrailsResponse;
-import com.flash_sale.app.entity.AuditTrails;
-import com.flash_sale.app.repository.AuditTrailsRepository;
+import com.flash_sale.app.entity.flash_sale.AuditTrails;
+import com.flash_sale.app.repository.flash_sale.AuditTrailsRepository;
 import com.flash_sale.app.service.Interface.AuditTrailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,7 @@
 package com.flash_sale.app.dto.result;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,24 +11,34 @@ import java.util.Date;
 @Builder
 public class FlashSaleSaveResponse {
 
-    @JsonProperty("FlashSale_Id")
-    private Long FsId;
     @JsonProperty("FlashSale_Name")
-    private String FsName;
+    private String fsName;
+
+    @JsonProperty("FlashSale_Code")
+    private String fsCode;
+
     @JsonProperty("FlashSale_Product")
-    private String FsProduct;
+    private String fsProduct;
+
     @JsonProperty("FlashSale_StartDate")
-    private Date FsStartDate;
+    private Date fsStartDate;
+
     @JsonProperty("FlashSale_EndDate")
-    private Date FsEndDate;
+    private Date fsEndDate;
+
     @JsonProperty("FlashSale_Discount")
-    private Double FsDiscount;
-    @JsonProperty("FlashSale_DiscountedPrice")
-    private Integer FsDiscountedPrice;
-    @JsonProperty("FlashSale_Status")
-    private String FsStatus;
+    private Double trxDiscount;
+
+    @JsonProperty("FlashSale_Price")
+    private Integer trxPrice;
+
     @JsonProperty("FlashSale_CreatedBy")
-    private String FsCreatedBy;
+    private String fsCreatedBy;
+
     @JsonProperty("FlashSale_CreatedDate")
-    private Date FsCreatedDate;
+    private Date fsCreatedDate;
+
+    @JsonProperty("FlashSale_IsDelete")
+    private Boolean fsIsDelete;
+
 }

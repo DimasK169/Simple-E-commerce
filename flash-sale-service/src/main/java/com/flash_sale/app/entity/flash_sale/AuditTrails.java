@@ -1,4 +1,4 @@
-package com.flash_sale.app.entity;
+package com.flash_sale.app.entity.flash_sale;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
