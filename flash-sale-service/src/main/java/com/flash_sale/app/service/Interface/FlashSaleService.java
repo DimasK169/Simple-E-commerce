@@ -19,6 +19,8 @@ public interface FlashSaleService {
 
     RestApiResponse<FlashSaleUpdateResponse> deleteFlashSale(String fsCode) throws JsonProcessingException;
 
+    RestApiResponse<List<FlashSaleUpdateResponse>> getByFlashSaleCode(String fsCode) throws JsonProcessingException;
+
     RestApiResponse<Page<FlashSale>> getAllFlashSale(int page, int size);
 }
 

@@ -19,6 +19,7 @@ public class TrxFlashSale {
     private Long productId;
     private Long fsId;
     private String fsCode;
+    private String productCode;
     private Double trxDiscount;
     private Integer trxPrice;
 

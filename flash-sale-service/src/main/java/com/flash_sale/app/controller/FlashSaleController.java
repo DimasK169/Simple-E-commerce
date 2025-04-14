@@ -37,6 +37,11 @@ public class FlashSaleController {
         return flashSaleService.deleteFlashSale(fsCode);
     }
 
+    @GetMapping("/{fsCode}")
+    public RestApiResponse<List<FlashSaleUpdateResponse>> getByFlashSaleCode(@PathVariable String fsCode) throws JsonProcessingException{
+        return flashSaleService.getByFlashSaleCode(fsCode);
+    }
+
     @GetMapping
     public RestApiResponse<Page<FlashSale>> getAllFlashSale(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return flashSaleService.getAllFlashSale(page, size);

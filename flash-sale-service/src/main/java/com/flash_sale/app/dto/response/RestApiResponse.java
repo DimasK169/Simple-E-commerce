@@ -27,7 +27,6 @@ public class RestApiResponse<T> {
 
     @JsonProperty("error")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-
     private List<String> error;
 
     @JsonProperty("data_all")

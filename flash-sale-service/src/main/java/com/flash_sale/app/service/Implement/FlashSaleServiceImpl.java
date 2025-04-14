@@ -48,61 +48,65 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         List<FlashSaleSaveResponse> responseList = new ArrayList<>();
 
         List<FlashSale> fetchFlashSale = flashSaleRepository.findByFsCode(request.getFsCode());
-       if (request.getFsCode().equals(fetchFlashSale.get(0).getFsCode())){
-           throw new IllegalArgumentException("Flash sale code has been used");
-       }
+        if (fetchFlashSale.isEmpty()){
+            for (String productCode : request.getProductCode()) {
+                List<Product> productList = productRepository.findByproductCode(productCode);
+                if (productList.isEmpty()) {
+                    throw new IllegalArgumentException("Product code not found: " + productCode);
+                }
 
-        for (String productCode : request.getProductCode()) {
-            List<Product> productList = productRepository.findByproductCode(productCode);
-            if (productList.isEmpty()) {
-                throw new IllegalArgumentException("Product code not found: " + productCode);
+                for (Product saveProduct : productList) {
+                    FlashSale flashSale = FlashSale.builder()
+                            .fsName(request.getFsName())
+                            .fsCode(request.getFsCode())
+                            .fsProduct(saveProduct.getProductName())
+                            .fsStartDate(request.getFsStartDate())
+                            .fsEndDate(request.getFsEndDate())
+                            .fsCreatedBy(request.getFsCreatedBy())
+                            .fsIsDelete(false)
+                            .fsCreatedDate(new Date())
+                            .build();
+
+                    FlashSale savedFlashSale = flashSaleRepository.save(flashSale);
+
+                    TrxFlashSale trxFlashSale = TrxFlashSale.builder()
+                            .productId(saveProduct.getProductId())
+                            .fsId(savedFlashSale.getFsId())
+                            .fsCode(savedFlashSale.getFsCode())
+                            .productCode(saveProduct.getProductCode())
+                            .trxDiscount(request.getTrxDiscount())
+                            .trxPrice((int)(saveProduct.getProductPrice()* (1 - request.getTrxDiscount())))
+                            .build();
+
+                    trxFlashSaleRepository.save(trxFlashSale);
+
+                    FlashSaleSaveResponse flashSaleSaveResponse = FlashSaleSaveResponse.builder()
+                            .fsName(savedFlashSale.getFsName())
+                            .fsCode(savedFlashSale.getFsCode())
+                            .fsProduct(savedFlashSale.getFsProduct())
+                            .trxDiscount(trxFlashSale.getTrxDiscount())
+                            .trxPrice(trxFlashSale.getTrxPrice())
+                            .fsStartDate(savedFlashSale.getFsStartDate())
+                            .fsEndDate(savedFlashSale.getFsEndDate())
+                            .fsCreatedBy(savedFlashSale.getFsCreatedBy())
+                            .fsIsDelete(savedFlashSale.getFsIsDelete())
+                            .fsCreatedDate(savedFlashSale.getFsCreatedDate())
+                            .build();
+
+                    responseList.add(flashSaleSaveResponse);
+                }
             }
+            return RestApiResponse.<List<FlashSaleSaveResponse>>builder()
+                    .code(HttpStatus.OK.toString())
+                    .message("Berhasil Membuat Flash-sale")
+                    .data(responseList)
+                    .build();
 
-            for (Product saveProduct : productList) {
-                FlashSale flashSale = FlashSale.builder()
-                        .fsName(request.getFsName())
-                        .fsCode(request.getFsCode())
-                        .fsProduct(saveProduct.getProductName())
-                        .fsStartDate(request.getFsStartDate())
-                        .fsEndDate(request.getFsEndDate())
-                        .fsCreatedBy(request.getFsCreatedBy())
-                        .fsIsDelete(false)
-                        .fsCreatedDate(new Date())
-                        .build();
 
-                FlashSale savedFlashSale = flashSaleRepository.save(flashSale);
-
-                TrxFlashSale trxFlashSale = TrxFlashSale.builder()
-                        .productId(saveProduct.getProductId())
-                        .fsId(savedFlashSale.getFsId())
-                        .fsCode(savedFlashSale.getFsCode())
-                        .trxDiscount(request.getTrxDiscount())
-                        .trxPrice((int)(saveProduct.getProductPrice()* (1 - request.getTrxDiscount())))
-                        .build();
-
-                trxFlashSaleRepository.save(trxFlashSale);
-
-                FlashSaleSaveResponse flashSaleSaveResponse = FlashSaleSaveResponse.builder()
-                        .fsName(savedFlashSale.getFsName())
-                        .fsCode(savedFlashSale.getFsCode())
-                        .fsProduct(savedFlashSale.getFsProduct())
-                        .trxDiscount(trxFlashSale.getTrxDiscount())
-                        .trxPrice(trxFlashSale.getTrxPrice())
-                        .fsStartDate(savedFlashSale.getFsStartDate())
-                        .fsEndDate(savedFlashSale.getFsEndDate())
-                        .fsCreatedBy(savedFlashSale.getFsCreatedBy())
-                        .fsIsDelete(savedFlashSale.getFsIsDelete())
-                        .fsCreatedDate(savedFlashSale.getFsCreatedDate())
-                        .build();
-
-                responseList.add(flashSaleSaveResponse);
-            }
+        } else if (request.getFsCode().equals(fetchFlashSale.get(0).getFsCode())){
+            throw new IllegalArgumentException("Flash sale code has been used");
         }
-        return RestApiResponse.<List<FlashSaleSaveResponse>>builder()
-                .code(HttpStatus.OK.toString())
-                .message("Berhasil Membuat Flash-sale")
-                .data(responseList)
-                .build();
+        return  null;
     }
 
     @Transactional
@@ -143,6 +147,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .productId(saveProduct.getProductId())
                         .fsId(updatedFlashSale.getFsId())
                         .fsCode(updatedFlashSale.getFsCode())
+                        .productCode(saveProduct.getProductCode())
                         .trxDiscount(request.getTrxDiscount())
                         .trxPrice((int)(saveProduct.getProductPrice()* (1 - request.getTrxDiscount())))
                         .build();
@@ -213,6 +218,58 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     }
 
     @Override
+    public RestApiResponse<List<FlashSaleUpdateResponse>> getByFlashSaleCode(String fsCode) throws JsonProcessingException {
+        List<FlashSale> fsList = getFsCode(fsCode);
+        if (fsList == null || fsList.isEmpty()) {
+            throw new IllegalArgumentException("Invalid Flash-Sale Code");
+        }
+
+        List<FlashSaleUpdateResponse> responseList = new ArrayList<>();
+
+        for (FlashSale flashSale : fsList) {
+            List<TrxFlashSale> trxList = trxFlashSaleRepository.findByFsId(flashSale.getFsId());
+
+            for (TrxFlashSale trx : trxList) {
+                Optional<Product> productOpt = productRepository.findById(trx.getProductId());
+                if (productOpt.isEmpty()) continue;
+
+                Product product = productOpt.get();
+
+                FlashSaleUpdateResponse response = FlashSaleUpdateResponse.builder()
+                        .fsName(flashSale.getFsName())
+                        .fsCode(flashSale.getFsCode())
+                        .fsProduct(flashSale.getFsProduct())
+                        .fsStartDate(flashSale.getFsStartDate())
+                        .fsEndDate(flashSale.getFsEndDate())
+                        .fsCreatedBy(flashSale.getFsCreatedBy())
+                        .fsUpdateDate(flashSale.getFsUpdateDate())
+                        .fsIsDelete(flashSale.getFsIsDelete())
+                        .trxDiscount(trx.getTrxDiscount())
+                        .trxPrice(trx.getTrxPrice())
+                        .status("Fetched")
+                        .build();
+
+                responseList.add(response);
+
+                auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
+                        .AtAction("Get")
+                        .AtDescription("Get Flash Sale By Code")
+                        .AtDate(new Date())
+                        .AtRequest(fsCode)
+                        .AtResponse("Berhasil ambil flash sale: " + flashSale.getFsProduct())
+                        .build());
+            }
+        }
+
+        return RestApiResponse.<List<FlashSaleUpdateResponse>>builder()
+                .code(HttpStatus.OK.toString())
+                .message("Berhasil menampilkan data flash sale")
+                .data(responseList)
+                .build();
+
+    }
+
+    @Override
     public RestApiResponse<Page<FlashSale>> getAllFlashSale(int page, int size) {
         Page<FlashSale> pageData = flashSaleRepository.findAllByFsIsDeleteFalse(PageRequest.of(page, size));
         return RestApiResponse.<Page<FlashSale>>builder()
@@ -225,4 +282,5 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     public List<FlashSale> getFsCode(String fsCode) {
         return flashSaleRepository.findByFsCode(fsCode);
     }
+
 }
