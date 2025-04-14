@@ -8,12 +8,13 @@ import java.util.Date;
 @Data
 @Builder
 public class ProductUpdateResponse {
-    private Long productId;
     private String productName;
+    private String productCode;
+    private String productImage;
     private String productDescription;
     private String productCategory;
-    private String productStock;
-    private String productPrice;
+    private Integer productStock;
+    private Integer productPrice;
     private Boolean productIsAvailable;
     private String createdBy;
     private Date createdDate;

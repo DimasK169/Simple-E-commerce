@@ -2,19 +2,14 @@ package com.product.app.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class ProductRequest {
+public class ProductUpdateRequest {
 
     @JsonProperty("name")
     @NotEmpty(message = "Product name cannot be empty")
     private String productName;
-
-    @JsonProperty("code")
-    @NotEmpty(message = "Product code cannot be empty")
-    private String productCode;
 
     @JsonProperty("description")
     @NotEmpty(message = "Product description cannot be empty")
@@ -26,7 +21,6 @@ public class ProductRequest {
 
     @JsonProperty("stock")
     @NotEmpty(message = "Product stock cannot be empty")
-
     private Integer productStock;
 
     @JsonProperty("price")
