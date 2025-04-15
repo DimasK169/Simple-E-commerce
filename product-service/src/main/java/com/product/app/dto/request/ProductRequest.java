@@ -37,4 +37,5 @@ public class ProductRequest {
 
     @JsonProperty("isAvailable")
     private Boolean productIsAvailable;
+
 }
