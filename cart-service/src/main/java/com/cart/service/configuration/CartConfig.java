@@ -16,38 +16,40 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
+import static com.cart.service.constant.GeneralConstant.*;
+
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.cart.service.repository.cart",
-        entityManagerFactoryRef = "cartEntityManagerFactory",
-        transactionManagerRef = "cartTransactionManager"
+        basePackages = CART_REPOSITORY,
+        entityManagerFactoryRef = CART_ENTITY_MANAGER_FACTORY,
+        transactionManagerRef = CART_TRANSACTION_MANAGER
 )
 public class CartConfig {
 
     @Primary
-    @Bean(name = "cartDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource.cart")
+    @Bean(name = CART_DATA_SOURCE)
+    @ConfigurationProperties(prefix = CART_DATASOURCE_PATH)
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Primary
-    @Bean(name = "cartEntityManagerFactory")
+    @Bean(name = CART_ENTITY_MANAGER_FACTORY)
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             EntityManagerFactoryBuilder builder,
-            @Qualifier("cartDataSource") DataSource dataSource) {
+            @Qualifier(CART_DATA_SOURCE) DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.cart.service.entity.cart")
+                .packages(CART_ENTITY)
                 .persistenceUnit("cart")
                 .build();
     }
 
     @Primary
-    @Bean(name = "cartTransactionManager")
+    @Bean(name = CART_TRANSACTION_MANAGER)
     public PlatformTransactionManager transactionManager(
-            @Qualifier("cartEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+            @Qualifier(CART_ENTITY_MANAGER_FACTORY) EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 

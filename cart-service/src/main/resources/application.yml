@@ -4,17 +4,18 @@ spring:
       jdbc-url: jdbc:postgresql://localhost:5432/db_cart
       username: postgres
       password: admin
-      driver-class-name: org.postgresql.Driver
     product:
       jdbc-url: jdbc:postgresql://localhost:5432/db_mst_product
       username: postgres
       password: admin
-      driver-class-name: org.postgresql.Driver
+    flash-sale:
+      jdbc-url: jdbc:postgresql://localhost:5432/db_flashsale
+      username: postgres
+      password: admin
     user:
       jdbc-url: jdbc:postgresql://localhost:5432/db_mst_user
       username: postgres
       password: admin
-      driver-class-name: org.postgresql.Driver
 
   jpa:
     properties:
@@ -22,3 +23,5 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+
+

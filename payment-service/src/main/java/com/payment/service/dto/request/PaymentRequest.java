@@ -17,16 +17,17 @@ import java.util.Map;
 @Builder
 public class PaymentRequest {
 
-    private Long cartId;
+    @JsonProperty("User_Id")
+    private Long userId;
+
+    @JsonProperty("User_Email")
+    private String userEmail;
 
     @JsonProperty("Payment_Number")
     private String paymentNumber;
 
     @JsonProperty("Payment_Type")
     private String paymentType;
-
-    @JsonProperty("Payment_Price")
-    private String paymentPrice;
 
     @JsonProperty("Payment_Status")
     private String paymentStatus;

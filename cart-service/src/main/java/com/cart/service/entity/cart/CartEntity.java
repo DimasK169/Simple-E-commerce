@@ -2,7 +2,6 @@ package com.cart.service.entity.cart;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,34 +20,19 @@ public class CartEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("Cart_Id")
     private Long cartId;
-
-    @NotEmpty
     private Long productId;
-
-    @NotEmpty
     private Long userId;
-
-    @NotEmpty
+    private Long trxFlashSaleId;
     private String userEmail;
-
-    @NotEmpty
+    private String productCode;
     private String productName;
-
-    @NotEmpty
-    private String cartNumber;
-
-    @NotEmpty
-    private Long cartQuantity;
-
-    @NotEmpty
-    private Long cartTotalPrice;
-
-    @NotEmpty
+    private Integer cartQuantity;
+    private Integer cartTotalPrice;
+    private String fsCode;
+    private Boolean isReadyToPay;
+    private Boolean isPayed;
+    private Boolean isFailed;
     private Date cartCreatedDate;
-
-    @NotEmpty
     private Date cartUpdatedDate;
-
-
 
 }

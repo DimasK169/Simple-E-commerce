@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,23 +18,19 @@ import java.util.UUID;
 public class AuditTrailsRequest {
 
     @JsonProperty("Audit_Trails_Action")
-    @NotEmpty
     private String auditTrailsAction;
 
     @JsonProperty("Audit_Trails_Date")
-    @NotEmpty
+    @NotNull(message = "Tanggal dibuat tidak boleh kosong")
     private Date auditTrailsDate;
 
     @JsonProperty("Audit_Trails_Description")
-    @NotEmpty
     private String auditTrailsDescription;
 
     @JsonProperty("Audit_Trails_Request")
-    @NotEmpty
     private String auditTrailsRequest;
 
     @JsonProperty("Audit_Trails_Response")
-    @NotEmpty
     private String auditTrailsResponse;
 
 }

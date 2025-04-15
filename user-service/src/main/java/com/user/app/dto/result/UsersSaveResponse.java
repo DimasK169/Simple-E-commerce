@@ -1,6 +1,7 @@
 package com.user.app.dto.result;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,6 +15,8 @@ public class UsersSaveResponse {
     private String userName;
     @JsonProperty("User_Email")
     private String userEmail;
+    @JsonProperty("User_Password")
+    private String userPassword;
     @JsonProperty("User_Phone")
     private String userPhone;
     @JsonProperty("User_Address")

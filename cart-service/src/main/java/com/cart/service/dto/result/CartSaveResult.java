@@ -1,5 +1,6 @@
 package com.cart.service.dto.result;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
@@ -12,44 +13,39 @@ import java.util.UUID;
 @Builder
 public class CartSaveResult {
 
-    @JsonProperty("Cart_Id")
-    @NotEmpty
-    private Long cartId;
-
-    @JsonProperty("Product_Id")
-    @NotEmpty
-    private Long productId;
-
-    @JsonProperty("User_Id")
-    @NotEmpty
-    private Long userId;
-
     @JsonProperty("User_Email")
-    @NotEmpty
     private String userEmail;
 
     @JsonProperty("Product_Name")
-    @NotEmpty
     private String productName;
 
-    @JsonProperty("Cart_Number")
-    @NotEmpty
-    private String cartNumber;
+    @JsonProperty("Fs_Code")
+    private String fsCode;
 
     @JsonProperty("Cart_Quantity")
-    @NotEmpty
-    private Long cartQuantity;
+    private Integer cartQuantity;
 
     @JsonProperty("Cart_Total_Price")
-    @NotEmpty
-    private Long cartTotalPrice;
+    private Integer cartTotalPrice;
+
+    @JsonProperty("Cart_Deleted")
+    private Boolean isDeleted;
+
+    @JsonProperty("Cart_Ready")
+    private Boolean isReadyToPay;
+
+    @JsonProperty("Cart_Payed")
+    private Boolean isPayed;
+
+    @JsonProperty("Cart_Failed")
+    private Boolean isFailed;
 
     @JsonProperty("Cart_Created_Date")
-    @NotEmpty
     private Date cartCreatedDate;
 
     @JsonProperty("Cart_Updated_Date")
-    @NotEmpty
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Date cartUpdatedDate;
+
 
 }

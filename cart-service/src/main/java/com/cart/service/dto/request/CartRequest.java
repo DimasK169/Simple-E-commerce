@@ -1,6 +1,7 @@
 package com.cart.service.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Data;
@@ -9,20 +10,18 @@ import lombok.Data;
 @Builder
 public class CartRequest {
 
-    private Long productId;
+    @JsonProperty("Product_Code")
+    private String productCode;
 
-    private Long userId;
-
-    @JsonProperty("Cart_Number")
+    @JsonProperty("User_Email")
     @NotEmpty
-    private String cartNumber;
+    private String userEmail;
 
     @JsonProperty("Cart_Quantity")
-    @NotEmpty
-    private Long cartQuantity;
+    @Min(value = 1, message = "Quantity harus lebih dari 0")
+    private Integer cartQuantity;
 
-    @JsonProperty("Cart_Total_Price")
-    @NotEmpty
-    private Long cartTotalPrice;
+    @JsonProperty("Fs_Code")
+    private String fsCode;
 
 }

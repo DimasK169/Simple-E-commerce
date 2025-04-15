@@ -9,10 +9,12 @@ import java.util.Date;
 @Builder
 public class ProductCreateResponse {
     private String productName;
+    private String productCode;
+    private String productImage;
     private String productDescription;
     private String productCategory;
-    private String productStock;
-    private String productPrice;
+    private Integer productStock;
+    private Integer productPrice;
     private Boolean productIsAvailable;
     private Boolean productIsDelete;
     private String createdBy;

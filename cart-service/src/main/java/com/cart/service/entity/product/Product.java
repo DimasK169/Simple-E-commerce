@@ -18,37 +18,19 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotEmpty
     private Long productId;
-
-    @NotEmpty
+    @Column(unique = true, nullable = false)
+    private String productCode;
     private String productName;
-
-    @NotEmpty
+    private String productImage;
     private String productDescription;
-
-    @NotEmpty
     private String productCategory;
-
-    @NotEmpty
-    private String productStock;
-
-    @NotEmpty
-    private String productPrice;
-
-    @NotEmpty
+    private Integer productStock;
+    private Integer productPrice;
     private Boolean productIsAvailable;
-
-    @NotEmpty
     private Boolean productIsDelete;
-
-    @NotEmpty
     private String createdBy;
-
-    @NotEmpty
     private Date createdDate;
-
-    @NotEmpty
     private Date updatedDate;
 
 }

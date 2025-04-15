@@ -21,34 +21,21 @@ import java.util.Date;
 public class CartEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("Cart_Id")
     private Long cartId;
-
-    @NotEmpty
     private Long productId;
-
-    @NotEmpty
     private Long userId;
-
-    @NotEmpty
     private String userEmail;
-
-    @NotEmpty
+    private String productCode;
     private String productName;
-
-    @NotEmpty
-    private String cartNumber;
-
-    @NotEmpty
-    private Long cartQuantity;
-
-    @NotEmpty
-    private Long cartTotalPrice;
-
-    @NotEmpty
+    private Integer cartQuantity;
+    private Integer cartTotalPrice;
+    private Boolean isReadyToPay;
+    private Boolean isDeleted;
+    private Boolean isPayed;
+    private Boolean isFailed;
     private Date cartCreatedDate;
-
-    @NotEmpty
     private Date cartUpdatedDate;
 
 }

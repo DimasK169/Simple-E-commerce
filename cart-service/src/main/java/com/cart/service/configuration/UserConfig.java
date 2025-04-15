@@ -15,35 +15,37 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
+import static com.cart.service.constant.GeneralConstant.*;
+
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.cart.service.repository.user",
-        entityManagerFactoryRef = "usersEntityManagerFactory",
-        transactionManagerRef = "usersTransactionManager"
+        basePackages = USER_REPOSITORY,
+        entityManagerFactoryRef = USER_ENTITY_MANAGER_FACTORY,
+        transactionManagerRef = USER_TRANSACTION_MANAGER
 )
 public class UserConfig {
 
-    @Bean(name = "usersDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource.user")
+    @Bean(name = USER_DATA_SOURCE)
+    @ConfigurationProperties(prefix = USER_DATASOURCE_PATH)
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
     }
 
-    @Bean(name = "usersEntityManagerFactory")
+    @Bean(name = USER_ENTITY_MANAGER_FACTORY)
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             EntityManagerFactoryBuilder builder,
-            @Qualifier("usersDataSource") DataSource dataSource) {
+            @Qualifier(USER_DATA_SOURCE) DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.cart.service.entity.user")
+                .packages(USER_ENTITY)
                 .persistenceUnit("users")
                 .build();
     }
 
-    @Bean(name = "usersTransactionManager")
+    @Bean(name = USER_TRANSACTION_MANAGER)
     public PlatformTransactionManager transactionManager(
-            @Qualifier("usersEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+            @Qualifier(USER_ENTITY_MANAGER_FACTORY) EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 

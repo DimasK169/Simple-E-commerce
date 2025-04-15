@@ -21,31 +21,13 @@ public class AuditTrails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("Audit_Trails_Id")
     private Long auditTrailsId;
-
-    @JsonProperty("Audit_Trails_Action")
-    @NotEmpty
     private String auditTrailsAction;
-
-    @JsonProperty("Audit_Trails_Date")
-    @NotEmpty
     private Date auditTrailsDate;
-
-    @JsonProperty("Audit_Trails_Description")
-    @NotEmpty
     private String auditTrailsDescription;
-
-    @JsonProperty("Audit_Trails_Request")
-    @NotEmpty
     @Column(columnDefinition = "TEXT")
     private String auditTrailsRequest;
-
-    @JsonProperty("Audit_Trails_Response")
-    @NotEmpty
     @Column(columnDefinition = "TEXT")
     private String auditTrailsResponse;
-
-    @JsonProperty("Audit_Trails_Third_Party_Response")
-    @NotEmpty
     @Column(columnDefinition = "TEXT")
     private String auditTrailsThirdPartyResponse;
 

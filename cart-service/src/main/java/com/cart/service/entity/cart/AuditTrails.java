@@ -22,25 +22,17 @@ public class AuditTrails {
     @JsonProperty("Audit_Trails_Id")
     private Long auditTrailsId;
 
-    @JsonProperty("Audit_Trails_Action")
-    @NotEmpty
+    @Column(columnDefinition = "TEXT")
     private String auditTrailsAction;
 
-    @JsonProperty("Audit_Trails_Date")
-    @NotEmpty
     private Date auditTrailsDate;
 
-    @JsonProperty("Audit_Trails_Description")
-    @NotEmpty
+    @Column(columnDefinition = "TEXT")
     private String auditTrailsDescription;
 
-    @JsonProperty("Audit_Trails_Request")
-    @NotEmpty
     @Column(columnDefinition = "TEXT")
     private String auditTrailsRequest;
 
-    @JsonProperty("Audit_Trails_Response")
-    @NotEmpty
     @Column(columnDefinition = "TEXT")
     private String auditTrailsResponse;
 

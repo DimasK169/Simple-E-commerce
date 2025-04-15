@@ -12,19 +12,25 @@ import java.util.Map;
 
 @Data
 @Builder
-public class PaymentSaveResult {
+public class PaymentSaveResult<T> {
 
-    @JsonProperty("Cart_Id")
-    private Long cartId;
+    @JsonProperty("User_Email")
+    private String userEmail;
 
     @JsonProperty("Payment_Number")
     private String paymentNumber;
 
+    @JsonProperty("Product_Name")
+    private String productName;
+
+    @JsonProperty("Product_Quantity")
+    private Integer productQuantity;
+
     @JsonProperty("Payment_Type")
     private String paymentType;
 
-    @JsonProperty("Payment_Price")
-    private String paymentPrice;
+    @JsonProperty("Cart_Total_Price")
+    private Integer cartTotalPrice;
 
     @JsonProperty("Payment_Status")
     private String paymentStatus;
@@ -36,7 +42,7 @@ public class PaymentSaveResult {
     private Date paymentEndDate;
 
     @JsonProperty("Payment_Third_Party")
-    private String paymentThirdParty;
+    private T paymentThirdParty;
 
     @JsonProperty("Payment_Created_Date")
     private Date paymentCreatedDate;
