@@ -22,20 +22,21 @@ public class AuditTrailsServiceImp implements AuditTrailsService {
     @Override
     public AuditTrailsResponse saveAuditTrails(AuditTrailsRequest request) throws JsonProcessingException {
 
-        AuditTrails trails = new AuditTrails();
-        trails.setAtAction(request.getAtAction());
-        trails.setAtDescription(request.getAtDescription());
-        trails.setAtRequest(request.getAtRequest());
-        trails.setAtResponse(request.getAtResponse());
-        trails.setAtDate(new Date());
-        AuditTrails save = auditTrailsRepository.save(trails);
+        AuditTrails auditTrails = AuditTrails.builder()
+                .AtAction(request.getAtAction())
+                .AtDescription(request.getAtDescription())
+                .AtRequest(request.getAtRequest())
+                .AtResponse(request.getAtResponse())
+                .AtDate(new Date())
+                .build();
+        AuditTrails save = auditTrailsRepository.save(auditTrails);
 
         AuditTrailsResponse response = new AuditTrailsResponse();
-        response.setAtAction(trails.getAtAction());
-        response.setAtDescription(trails.getAtDescription());
-        response.setAtRequest(trails.getAtRequest());
-        response.setAtResponse(trails.getAtResponse());
-        response.setAtDate(trails.getAtDate());
+        response.setAtAction(auditTrails.getAtAction());
+        response.setAtDescription(auditTrails.getAtDescription());
+        response.setAtRequest(auditTrails.getAtRequest());
+        response.setAtResponse(auditTrails.getAtResponse());
+        response.setAtDate(auditTrails.getAtDate());
 
         return response;
     }
