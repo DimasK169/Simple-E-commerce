@@ -14,5 +14,4 @@ public class AuditTrailsRequest {
     private String AtDescription;
     private String AtRequest;
     private String AtResponse;
-
 }
