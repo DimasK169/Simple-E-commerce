@@ -1,15 +1,13 @@
-package com.product.app;
+package com.flash_sale.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ProductServiceApplication {
+public class FlashSaleServiceApplication {
 
-	//TODO UNIT TESTING
-	//TODO Store Gambar
 	public static void main(String[] args) {
-		SpringApplication.run(ProductServiceApplication.class, args);
+		SpringApplication.run(FlashSaleServiceApplication.class, args);
 	}
 
 }
