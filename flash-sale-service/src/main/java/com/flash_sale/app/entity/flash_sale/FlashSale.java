@@ -18,10 +18,8 @@ public class FlashSale {
     @Id
     @GeneratedValue (strategy = GenerationType.AUTO)
     private Long fsId;
-    private Long productId;
     private String fsName;
     private String fsCode;
-    private String productCode;
     private String fsProduct;
     private Date fsStartDate;
     private Date fsEndDate;
