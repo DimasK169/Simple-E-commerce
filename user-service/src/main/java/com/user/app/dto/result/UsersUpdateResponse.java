@@ -20,8 +20,6 @@ public class UsersUpdateResponse {
     private String userAddress;
     @JsonProperty("User_Role")
     private String userRole;
-    @JsonProperty("User_IsActive")
-    private Boolean userIsActive;
     @JsonProperty("User_UpdatedDate")
     private Date userUpdatedDate;
 }
