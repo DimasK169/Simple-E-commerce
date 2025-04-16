@@ -74,6 +74,11 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 			<version>3.4.4</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pusher</groupId>
+			<artifactId>pusher-http-java</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
