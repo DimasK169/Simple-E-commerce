@@ -29,6 +29,9 @@ public class PaymentSaveResult<T> {
     @JsonProperty("Payment_Type")
     private String paymentType;
 
+    @JsonProperty("Cart_Total_Price_Per_Item")
+    private Integer cartTotalPricePerItem;
+
     @JsonProperty("Cart_Total_Price")
     private Integer cartTotalPrice;
 

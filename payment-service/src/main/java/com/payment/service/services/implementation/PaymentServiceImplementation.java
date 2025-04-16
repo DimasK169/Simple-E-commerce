@@ -24,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.payment.service.constant.GeneralConstant.*;
 
@@ -56,41 +57,42 @@ public class PaymentServiceImplementation implements PaymentService {
 
     @Override
     public RestApiResponse<PaymentSaveResult> createPayment(PaymentRequest paymentRequest) throws JsonProcessingException, ParseException {
-        ObjectMapper mapper = new ObjectMapper();
-        System.out.println("CREATE");
+
+        List<String> errors = new ArrayList<>();
         try{
             List<CartEntity> cartEntity = cartRepository.findByUserEmail(paymentRequest.getUserEmail(), true, false, false);
             if(cartEntity.isEmpty()){
                throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList("Payment Dengan User Email: " + paymentRequest.getUserEmail()));
             }
-            System.out.println(cartEntity);
 
             Integer totalPrice = 0;
+
+            PaymentEntity createNewPayment = insertPayment(paymentRequest, cartEntity);
+
             for (CartEntity cartData : cartEntity) {
                 totalPrice += cartData.getCartTotalPrice();
+                cartData.setPaymentNumber(createNewPayment.getPaymentNumber());
+                cartRepository.save(cartData);
             }
 
-            PaymentEntity createPayment = insertPayment(paymentRequest, cartEntity);
-            System.out.println("createPayment" + createPayment);
-            ResponseEntity<Map> response = postMidtrans(paymentRequest.getPaymentType(), createPayment.getPaymentNumber(), totalPrice);
+            ResponseEntity<Map> response = postMidtrans(paymentRequest.getPaymentType(), createNewPayment.getPaymentNumber(), totalPrice);
             System.out.println("response"+response);
-
-            String midtransUrl = String.format(midtransStatus, createPayment.getPaymentNumber());
+            String midtransUrl = String.format(midtransStatus, createNewPayment.getPaymentNumber());
             ResponseEntity<Map> responseGet = getMidtrans(midtransUrl);
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             if (responseGet.getStatusCode() == HttpStatus.OK) {
                 Map<String, Object> responseBody = responseGet.getBody();
                 if (responseBody != null) {
-                    createPayment.setPaymentStartDate(sdf.parse(responseBody.get("transaction_time").toString()));
-                    createPayment.setPaymentEndDate(sdf.parse(responseBody.get("expiry_time").toString()));
+                    createNewPayment.setPaymentStartDate(sdf.parse(responseBody.get("transaction_time").toString()));
+                    createNewPayment.setPaymentEndDate(sdf.parse(responseBody.get("expiry_time").toString()));
                 }
             }
-            createPayment.setPaymentStatus(response.getBody().get("transaction_status").toString());
-            createPayment.setPaymentThirdParty(response.toString());
-            PaymentEntity savePayment = paymentRepository.save(createPayment);
+            createNewPayment.setPaymentStatus(response.getBody().get("transaction_status").toString());
+            createNewPayment.setPaymentThirdParty(response.toString());
+            PaymentEntity savePayment = paymentRepository.save(createNewPayment);
 
-            PaymentSaveResult responsePayment = paymentSaveResult(createPayment, response);
+            PaymentSaveResult responsePayment = paymentSaveResult(createNewPayment, response);
 
             insertAuditTrails(paymentRequest, responsePayment, response);
 
@@ -119,7 +121,7 @@ public class PaymentServiceImplementation implements PaymentService {
             PaymentEntity paymentEntity = existingPayment.get();
 
             if (transactionStatus.equals("settlement")){
-                List<CartEntity> cartEntities = cartRepository.findByUserEmail(existingPayment.get().getUserEmail(), true, false, false);
+                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(existingPayment.get().getUserEmail(), existingPayment.get().getPaymentNumber(), true, false, false);
                 for (CartEntity updateCart : cartEntities){
                     updateCart.setIsPayed(true);
                     updateCart.setCartUpdatedDate(new Date());
@@ -131,7 +133,7 @@ public class PaymentServiceImplementation implements PaymentService {
             }
 
             if (transactionStatus.equals("expire")){
-                List<CartEntity> cartEntities = cartRepository.findByUserEmail(existingPayment.get().getUserEmail(), true, false, false);
+                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(existingPayment.get().getUserEmail(), existingPayment.get().getPaymentNumber(),true, false, false);
                 for (CartEntity updateCart : cartEntities){
                     updateCart.setIsFailed(true);
                     updateCart.setCartUpdatedDate(new Date());
@@ -155,6 +157,90 @@ public class PaymentServiceImplementation implements PaymentService {
         return null;
     }
 
+    @Override
+    public RestApiResponse<List<PaymentSaveResult>> getUnfinishedPayment(PaymentRequest paymentRequest){
+
+        List<String> errors = new ArrayList<>();
+
+        try{
+
+            List<PaymentEntity> paymentEntities = paymentRepository.findPaymentByEmailAndStatus(paymentRequest.getUserEmail(), paymentRequest.getPaymentStatus());
+            if (paymentEntities.isEmpty()) errors.add(PAYMENT_NOT_FOUND);
+
+            List<PaymentSaveResult> results = new ArrayList<>();
+
+            for (PaymentEntity getPayment : paymentEntities){
+                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(paymentRequest.getUserEmail(), paymentRequest.getPaymentNumber(), true, false,false);
+                if (cartEntities.isEmpty()) errors.add(CART_NOT_FOUND);
+
+                for (CartEntity getCart : cartEntities){
+                    PaymentSaveResult result = getPayment(getPayment);
+                    result.setProductQuantity(getCart.getCartQuantity());
+                    result.setProductName(getCart.getProductName());
+                    result.setCartTotalPricePerItem(getCart.getCartTotalPrice());
+                    results.add(result);
+                }
+            }
+
+            if (!errors.isEmpty()){
+                throw new CustomIllegalArgumentException("Validation Error", errors);
+            }
+
+            return RestApiResponse.<List<PaymentSaveResult>>builder()
+                    .code(AUDIT_GET_ACTION)
+                    .message(AUDIT_GET_DESC_ACTION_SUCCESS)
+                    .data(results)
+                    .build();
+
+        } catch (CustomIllegalArgumentException e){
+            throw e;
+        }
+    }
+
+    public RestApiResponse<List<PaymentSaveResult>> getFinishedPayment(PaymentRequest paymentRequest){
+
+        List<String> errors = new ArrayList<>();
+
+        try{
+
+            List<PaymentEntity> allPayments = paymentRepository.findPaymentByEmail(paymentRequest.getUserEmail());
+            if (allPayments.isEmpty()) errors.add(PAYMENT_NOT_FOUND);
+
+            List<PaymentEntity> paymentEntities = allPayments.stream()
+                    .filter(p -> p.getPaymentStatus().equalsIgnoreCase("settlement") ||
+                            p.getPaymentStatus().equalsIgnoreCase("expired"))
+                    .collect(Collectors.toList());
+
+            List<PaymentSaveResult> results = new ArrayList<>();
+
+            for (PaymentEntity getPayment : paymentEntities){
+                System.out.println(getPayment.getPaymentStatus() + " " + getPayment.getPaymentNumber());
+                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(paymentRequest.getUserEmail(), getPayment.getPaymentNumber(), true, true, false);
+                if (cartEntities.isEmpty()) errors.add(CART_NOT_FOUND);
+
+                for (CartEntity getCart : cartEntities){
+                    PaymentSaveResult result = getPayment(getPayment);
+                    result.setProductQuantity(getCart.getCartQuantity());
+                    result.setProductName(getCart.getProductName());
+                    result.setCartTotalPricePerItem(getCart.getCartTotalPrice());
+                    results.add(result);
+                }
+            }
+
+            if (!errors.isEmpty()){
+                throw new CustomIllegalArgumentException("Validation Error", errors);
+            }
+
+            return RestApiResponse.<List<PaymentSaveResult>>builder()
+                    .code(AUDIT_GET_ACTION)
+                    .message(AUDIT_GET_DESC_ACTION_SUCCESS)
+                    .data(results)
+                    .build();
+
+        } catch (CustomIllegalArgumentException e){
+            throw e;
+        }
+    }
     private String encodeServerKey() {
         return java.util.Base64.getEncoder().encodeToString((midtransKey + ":").getBytes());
     }
@@ -212,6 +298,17 @@ public class PaymentServiceImplementation implements PaymentService {
                 .build();
     }
 
+    private PaymentSaveResult getPayment(PaymentEntity payment){
+        return PaymentSaveResult.builder()
+                .paymentNumber(payment.getPaymentNumber())
+                .paymentStatus(payment.getPaymentStatus())
+                .paymentType(payment.getPaymentType())
+                .cartTotalPrice(payment.getPaymentPrice())
+                .paymentStartDate(payment.getPaymentStartDate())
+                .paymentEndDate(payment.getPaymentEndDate())
+                .paymentCreatedDate(payment.getPaymentCreatedDate())
+                .build();
+    }
     private void
     insertAuditTrails(PaymentRequest paymentRequest, PaymentSaveResult paymentSaveResult, ResponseEntity<Map> response) throws JsonProcessingException {
         System.out.println("psr" + paymentRequest + "response" + response);
