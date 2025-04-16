@@ -19,11 +19,4 @@ public interface CartRepository extends JpaRepository<CartEntity, Long> {
     @Query("Select t From CartEntity t Where t.userEmail=:userEmail and t.isReadyToPay=:isReadyToPay and t.isPayed=:isPayed and t.isFailed=:isFailed")
     List<CartEntity> findByUserEmail(String userEmail, Boolean isReadyToPay, Boolean isPayed, Boolean isFailed);
 
-    @Modifying
-    @Query("DELETE FROM CartEntity t WHERE t.userEmail = :userEmail AND t.fsCode = :fsCode AND t.isReadyToPay = :isReadyToPay")
-    void deleteByUserEmailAndFsCode(String userEmail, String fsCode, Boolean isReadyToPay);
-
-    @Modifying
-    @Query("DELETE FROM CartEntity t WHERE t.userEmail = :userEmail AND t.productCode = :productCode AND t.isReadyToPay = :isReadyToPay")
-    void deleteByUserEmailAndProductCode(String userEmail, String productCode, Boolean isReadyToPay);
 }

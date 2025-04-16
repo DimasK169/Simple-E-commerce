@@ -12,6 +12,8 @@ public class UsersLoginResponse {
     private String userEmail;
     @JsonProperty("User_Password")
     private String userPassword;
+    @JsonProperty("User_Name")
+    private String userName;
     @JsonProperty("User_Token")
     private String userToken;
 

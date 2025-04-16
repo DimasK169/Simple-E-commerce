@@ -26,10 +26,19 @@ public class GeneralConstant {
     public static final String PRODUCT_ENTITY_MANAGER_FACTORY = "productEntityManagerFactory";
     public static final String PRODUCT_TRANSACTION_MANAGER = "productTransactionManager";
 
+    //Cart Get
+    public static final String CART_NOT_FOUND = "Cart Tidak Ditemukan";
+
+    //Payment Get
+    public static final String PAYMENT_NOT_FOUND = "Payment Tidak Ditemukan";
+
     //Audit Create
     public static final String AUDIT_CREATE_ACTION = "Create";
     public static final String AUDIT_CREATE_DESC_ACTION_SUCCESS = "Payment Baru Berhasil Dibuat";
     public static final String AUDIT_CREATE_DESC_ACTION_FAILED = "Gagal Membuat Payment";
 
-
+    //Audit Get
+    public static final String AUDIT_GET_ACTION = "Get";
+    public static final String AUDIT_GET_DESC_ACTION_SUCCESS = "Payment Berhasil Diambil";
+    public static final String AUDIT_GET_DESC_ACTION_FAILED = "Gagal Mengambil Payment";
 }

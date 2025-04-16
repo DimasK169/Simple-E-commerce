@@ -1,5 +1,6 @@
 package com.cart.service.services.implementation;
 
+import com.cart.service.dto.result.CartGetResult;
 import com.cart.service.dto.result.CartUpdateResult;
 import com.cart.service.entity.flashsale.FlashSale;
 import com.cart.service.entity.flashsale.TrxFlashSale;
@@ -111,7 +112,9 @@ public class CartServiceImplementation implements CartService {
             CartEntity savedCart = cartRepository.save(cartEntity);
             CartSaveResult result = buildCartSaveResult(savedCart);
 
-            insertAuditTrail(cartRequest, result, AUDIT_CREATE_DESC_ACTION_SUCCESS);
+            insertAuditTrail(cartRequest, result, AUDIT_CREATE_DESC_ACTION_SUCCESS, AUDIT_CREATE_ACTION);
+
+            getCartByUserEmailAndProductCode(jwtPayload, cartRequest);
 
             return RestApiResponse.<CartSaveResult>builder()
                     .code(HttpStatus.CREATED.toString())
@@ -121,7 +124,7 @@ public class CartServiceImplementation implements CartService {
                     .build();
 
         } catch (IllegalArgumentException e) {
-            insertAuditTrail(cartRequest, null, AUDIT_CREATE_DESC_ACTION_FAILED + ": " + e.getMessage());
+            insertAuditTrail(cartRequest, null, AUDIT_CREATE_DESC_ACTION_FAILED, AUDIT_CREATE_ACTION);
             throw e;
         }
     }
@@ -156,9 +159,9 @@ public class CartServiceImplementation implements CartService {
                     Optional<TrxFlashSale> trxFlashSale = trxFlashSaleRepository.findByFsCodeAndProductCode(cart.get().getFsCode(), cart.get().getProductCode());
                     if (trxFlashSale.isEmpty()) errors.add(TRXFLASHSALE_NOT_FOUND);
 
-//                    if (!errors.isEmpty()) {
-//                        throw new CustomIllegalArgumentException("Validation Error", errors);
-//                    }
+                    if (!errors.isEmpty()) {
+                        throw new CustomIllegalArgumentException("Validation Error", errors);
+                    }
 
                     FlashSale fs = flashSale.get();
                     TrxFlashSale trx = trxFlashSale.get();
@@ -167,18 +170,18 @@ public class CartServiceImplementation implements CartService {
                         if (dateNow.before(fs.getFsStartDate()) || dateNow.after(fs.getFsEndDate())){
                             errors.add(FLASHSALE_TIMEOUT);
                         } else {
-                            updateCart.setCartTotalPrice(trx.getTrxPrice() * updateCart.getCartQuantity());
+                            updateCart.setCartTotalPrice(trx.getTrxPrice() * cartRequest.getCartQuantity());
                         }
                     }
                 }
-                updateCart.setCartTotalPrice(product.get().getProductPrice() * updateCart.getCartQuantity());
+                updateCart.setCartTotalPrice(product.get().getProductPrice() * cartRequest.getCartQuantity());
                 updateCart.setCartUpdatedDate(new Date());
                 CartEntity updatedCart = cartRepository.save(updateCart);
 
                 CartSaveResult result = buildCartSaveResult(updatedCart);
                 responseList.add(result);
 
-                insertAuditTrail(cartRequest, result, AUDIT_UPDATE_DESC_ACTION_SUCCESS);
+                insertAuditTrail(cartRequest, result, AUDIT_UPDATE_DESC_ACTION_SUCCESS, AUDIT_UPDATE_ACTION);
 
                 return RestApiResponse.<CartSaveResult>builder()
                         .code(HttpStatus.OK.toString())
@@ -191,7 +194,7 @@ public class CartServiceImplementation implements CartService {
             throw new CustomIllegalArgumentException("Validation failed", errors);
 
         } catch (IllegalArgumentException e){
-            insertAuditTrail(cartRequest, null, AUDIT_UPDATE_DESC_ACTION_FAILED);
+            insertAuditTrail(cartRequest, null, AUDIT_UPDATE_DESC_ACTION_FAILED, AUDIT_UPDATE_ACTION);
             throw e;
         }
 
@@ -229,7 +232,7 @@ public class CartServiceImplementation implements CartService {
                     Product save = productRepository.save(updateProduct);
                 }
 
-                insertAuditTrail(cartRequest, resultList, AUDIT_UPDATE_DESC_ACTION_SUCCESS);
+                insertAuditTrail(cartRequest, resultList, AUDIT_UPDATE_DESC_ACTION_SUCCESS, AUDIT_UPDATE_ACTION);
 
             }
 
@@ -243,7 +246,7 @@ public class CartServiceImplementation implements CartService {
                     .build();
 
         } catch (IllegalArgumentException e){
-            insertAuditTrail(cartRequest, null, AUDIT_UPDATE_DESC_ACTION_FAILED);
+            insertAuditTrail(cartRequest, null, AUDIT_UPDATE_DESC_ACTION_FAILED, AUDIT_UPDATE_ACTION);
             throw e;
         }
 
@@ -265,7 +268,7 @@ public class CartServiceImplementation implements CartService {
 
             cartRepository.delete(cart.get());
 
-            insertAuditTrail(cartRequest, null, AUDIT_DELETE_DESC_ACTION_SUCCESS);
+            insertAuditTrail(cartRequest, null, AUDIT_DELETE_DESC_ACTION_SUCCESS, AUDIT_DELETE_ACTION);
 
             return RestApiResponse.builder()
                     .code(HttpStatus.OK.toString())
@@ -275,7 +278,47 @@ public class CartServiceImplementation implements CartService {
                     .build();
 
         } catch (IllegalArgumentException e){
-            insertAuditTrail(cartRequest, null, AUDIT_DELETE_DESC_ACTION_FAILED);
+            insertAuditTrail(cartRequest, null, AUDIT_DELETE_DESC_ACTION_FAILED, AUDIT_DELETE_ACTION);
+            throw e;
+        }
+    }
+
+    @Override
+    public RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String jwtPayload, CartRequest cartRequest)throws JsonProcessingException{
+        List<String> errors = new ArrayList<>();
+        try{
+            if (!"User".equals(jwtPayload))errors.add(CART_MESSAGE_WRONG_ROLE);
+
+            List<CartGetResult> result = new ArrayList<>();
+
+            List<CartEntity> cart = cartRepository.findByUserEmail(cartRequest.getUserEmail(),  false, false, false);
+            if (cart.isEmpty()) errors.add(CART_NOT_FOUND);
+
+            Integer totalPrice = 0;
+            for (CartEntity getCart : cart){
+                Optional<Product> product = productRepository.findProductByCode(getCart.getProductCode());
+                if (product.isEmpty()) errors.add(PRODUCT_NOT_FOUND);
+
+                Product getProduct = product.get();
+
+                totalPrice += getCart.getCartTotalPrice();
+
+                CartGetResult resultAudit = buildCartGetResult(getCart, getProduct, totalPrice);
+                result.add(resultAudit);
+
+                insertAuditTrail(cartRequest, resultAudit, AUDIT_GET_DESC_ACTION_SUCCESS ,AUDIT_GET_ACTION);
+
+            }
+
+            System.out.println(result);
+
+            return RestApiResponse.<List<CartGetResult>>builder()
+                    .code(HttpStatus.OK.toString())
+                    .message(AUDIT_GET_DESC_ACTION_SUCCESS)
+                    .data(result)
+                    .build();
+
+        } catch (IllegalArgumentException e){
             throw e;
         }
     }
@@ -322,7 +365,20 @@ public class CartServiceImplementation implements CartService {
                 .build();
     }
 
-    private void insertAuditTrail(CartRequest request, Object response, String description) throws JsonProcessingException {
+    private CartGetResult buildCartGetResult(CartEntity cart, Product product, Integer totalPrice){
+        return CartGetResult.builder()
+                .productName(cart.getProductName())
+                .productDesc(product.getProductDescription())
+                .productImage(product.getProductImage())
+                .productPrice(product.getProductPrice())
+                .cartTotalPricePerItem(cart.getCartTotalPrice())
+                .cartTotalPrice(totalPrice)
+                .cartQuantity(cart.getCartQuantity())
+                .createdDate(new Date())
+                .build();
+    }
+
+    private void insertAuditTrail(CartRequest request, Object response, String description, String action) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
         String result = null;
@@ -339,13 +395,19 @@ public class CartServiceImplementation implements CartService {
             }
         }
 
-        auditTrailsService.insertAuditTrails(AuditTrailsRequest.builder()
-                .auditTrailsAction(AUDIT_CREATE_ACTION)
-                .auditTrailsDescription(description)
-                .auditTrailsDate(new Date())
-                .auditTrailsRequest(objectMapper.writeValueAsString(request))
-                .auditTrailsResponse(result)
-                .build());
+        if (action.equals(AUDIT_CREATE_ACTION) ||
+                action.equals(AUDIT_UPDATE_ACTION) ||
+                action.equals(AUDIT_DELETE_ACTION) || action.equals(AUDIT_GET_ACTION)) {
+
+            auditTrailsService.insertAuditTrails(AuditTrailsRequest.builder()
+                    .auditTrailsAction(action)
+                    .auditTrailsDescription(description)
+                    .auditTrailsDate(new Date())
+                    .auditTrailsRequest(objectMapper.writeValueAsString(request))
+                    .auditTrailsResponse(result)
+                    .build());
+        }
+
     }
 
 }

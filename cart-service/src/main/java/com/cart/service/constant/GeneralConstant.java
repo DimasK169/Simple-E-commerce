@@ -52,6 +52,11 @@ public class GeneralConstant {
     public static final String AUDIT_DELETE_DESC_ACTION_SUCCESS = "Cart Berhasil Di-Delete";
     public static final String AUDIT_DELETE_DESC_ACTION_FAILED = "Gagal Delete Cart";
 
+    //Audit Delete
+    public static final String AUDIT_GET_ACTION = "Get";
+    public static final String AUDIT_GET_DESC_ACTION_SUCCESS = "Cart Berhasil Di-Fetch";
+    public static final String AUDIT_GET_DESC_ACTION_FAILED = "Gagal Delete Cart";
+
     //Exception
     public static final String PRODUCT_NOT_FOUND = "Product Tidak Ditemukan";
     public static final String USER_NOT_FOUND = "User Tidak Ditemukan";

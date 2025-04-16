@@ -31,6 +31,7 @@ public class CartEntity {
     private String productName;
     private Integer cartQuantity;
     private Integer cartTotalPrice;
+    private String paymentNumber;
     private Boolean isReadyToPay;
     private Boolean isDeleted;
     private Boolean isPayed;

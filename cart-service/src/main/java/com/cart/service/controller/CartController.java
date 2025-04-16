@@ -1,5 +1,6 @@
 package com.cart.service.controller;
 
+import com.cart.service.dto.result.CartGetResult;
 import com.cart.service.dto.result.CartUpdateResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.cart.service.dto.request.CartRequest;
@@ -40,6 +41,11 @@ public class CartController {
     @DeleteMapping("")
     public RestApiResponse deleteCart(HttpServletRequest request, @RequestBody @Valid CartRequest cartRequest) throws JsonProcessingException {
         return cartService.deleteCart((String) request.getAttribute("userRole"), cartRequest);
+    }
+
+    @GetMapping("")
+    public RestApiResponse<List<CartGetResult>> getAllCart(HttpServletRequest request, @RequestBody @Valid CartRequest cartRequest)throws JsonProcessingException{
+        return cartService.getCartByUserEmailAndProductCode((String) request.getAttribute("userRole"), cartRequest);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.cart.service.services.services;
 
+import com.cart.service.dto.result.CartGetResult;
 import com.cart.service.dto.result.CartUpdateResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.cart.service.dto.request.CartRequest;
@@ -16,5 +17,6 @@ public interface CartService {
     RestApiResponse<CartSaveResult> updateQuantityCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException;
     RestApiResponse<List<CartUpdateResult>> updateReadyStateCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException;
     RestApiResponse deleteCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException;
+    RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String jwtPayload, CartRequest cartRequest)throws JsonProcessingException;
 
 }
