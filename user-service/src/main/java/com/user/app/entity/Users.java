@@ -25,7 +25,6 @@ public class Users {
     private String userPhone;
     private String userAddress;
     private String userRole;
-    private Boolean userIsActive;
     private Date userCreatedDate;
     private Date userUpdatedDate;
 }

@@ -23,8 +23,7 @@ public class UsersSaveResponse {
     private String userAddress;
     @JsonProperty("User_Role")
     private String userRole;
-    @JsonProperty("User_IsActive")
-    private Boolean userIsActive;
+
     @JsonProperty("User_CreatedDate")
     private Date userCreatedDate;
 }
