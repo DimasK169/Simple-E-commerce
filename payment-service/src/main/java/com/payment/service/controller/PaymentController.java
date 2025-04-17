@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 
@@ -31,5 +32,15 @@ public class PaymentController {
     @PostMapping(PAYMENT_WEBHOOK_API_PATH)
     public String handleMidtransWebhook(@RequestBody Map<String, Object> payload) {
         return paymentServiceImplementation.updatePaymentStatus(payload);
+    }
+
+    @GetMapping("")
+    public RestApiResponse<List<PaymentSaveResult>> getUnpaidPayment(@RequestBody PaymentRequest paymentRequest){
+        return paymentServiceImplementation.getUnfinishedPayment(paymentRequest);
+    }
+
+    @GetMapping("/finished")
+    public RestApiResponse<List<PaymentSaveResult>> getFinishedPayment(@RequestBody PaymentRequest paymentRequest){
+        return paymentServiceImplementation.getFinishedPayment(paymentRequest);
     }
 }

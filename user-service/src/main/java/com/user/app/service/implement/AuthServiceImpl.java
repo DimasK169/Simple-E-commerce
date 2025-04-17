@@ -50,9 +50,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Jika login berhasil
-        String token = generateToken(users.getUserEmail(), users.getUserRole());
+        String token = generateToken(users.getUserEmail(), users.getUserRole(), users.getUserName());
         UsersLoginResponse usersLoginResponse = UsersLoginResponse.builder()
                 .userEmail(users.getUserEmail())
+                .userName(users.getUserName())
                 .userToken(token)
                 .build();
 
@@ -64,12 +65,13 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    public static String generateToken(String userEmail, String userRole) throws Exception {
+    public static String generateToken(String userEmail, String userRole, String userName) throws Exception {
         RSAPrivateKey privateKey = KeyUtil.getPrivateKey();
         return JWT.create()
                 .withSubject(userEmail)
                 .withIssuer("your-auth-server")
                 .withClaim("userRole", userRole)
+                .withClaim("userName", userName)
                 .withExpiresAt(new Date(System.currentTimeMillis() + 3600 * 1000)) // 1 jam
                 .sign(Algorithm.RSA256(null, privateKey));
     }

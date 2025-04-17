@@ -20,6 +20,9 @@ public class PaymentRequest {
     @JsonProperty("User_Id")
     private Long userId;
 
+    @JsonProperty("Payment_Id")
+    private Long paymentId;
+
     @JsonProperty("User_Email")
     private String userEmail;
 

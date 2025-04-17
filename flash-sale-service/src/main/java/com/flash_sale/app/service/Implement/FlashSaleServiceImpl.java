@@ -14,6 +14,7 @@ import com.flash_sale.app.repository.flash_sale.FlashSaleRepository;
 import com.flash_sale.app.repository.flash_sale.TrxFlashSaleRepository;
 import com.flash_sale.app.repository.product.ProductRepository;
 import com.flash_sale.app.service.Interface.FlashSaleService;
+import com.pusher.rest.Pusher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,6 +42,9 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Autowired
     private AuditTrailsServiceImpl auditTrailsService;
+
+    @Autowired
+    private Pusher pusher;
 
     @Transactional
     @Override
@@ -96,6 +100,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                     responseList.add(flashSaleSaveResponse);
                 }
             }
+            pusher.trigger("flash-sale","create", responseList);
             return RestApiResponse.<List<FlashSaleSaveResponse>>builder()
                     .code(HttpStatus.OK.toString())
                     .message("Berhasil Membuat Flash-sale")
