@@ -57,7 +57,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public RestApiResponse<Page<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public RestApiResponse<Page<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         return productService.getAllProducts(page, size);
     }
 

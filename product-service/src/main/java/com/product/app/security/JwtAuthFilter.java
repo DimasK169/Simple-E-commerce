@@ -43,6 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(userEmail, null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                System.out.println(auth);
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Token tidak valid: " + e.getMessage());
