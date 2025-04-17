@@ -32,7 +32,4 @@ public class CartUpdateResult {
     @JsonProperty("Cart_Updated_Date")
     private Date cartUpdatedDate;
 
-    @JsonProperty("Cart_Is_Ready_To_Pay")
-    private Boolean isReadyToPay;
-
 }

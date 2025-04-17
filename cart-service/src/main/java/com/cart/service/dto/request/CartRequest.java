@@ -14,7 +14,6 @@ public class CartRequest {
     private String productCode;
 
     @JsonProperty("User_Email")
-    @NotEmpty
     private String userEmail;
 
     @JsonProperty("Cart_Quantity")

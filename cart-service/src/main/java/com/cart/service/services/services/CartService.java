@@ -13,10 +13,9 @@ import java.util.List;
 @Service
 public interface CartService {
 
-    RestApiResponse<CartSaveResult> addToCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException;
-    RestApiResponse<CartSaveResult> updateQuantityCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException;
-    RestApiResponse<List<CartUpdateResult>> updateReadyStateCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException;
-    RestApiResponse deleteCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException;
-    RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String jwtPayload, CartRequest cartRequest)throws JsonProcessingException;
+    RestApiResponse<CartSaveResult> addToCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException;
+    RestApiResponse<CartSaveResult> updateQuantityCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException;
+    RestApiResponse deleteCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException;
+    RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String userRole, String userEmail, CartRequest cartRequest)throws JsonProcessingException;
 
 }
