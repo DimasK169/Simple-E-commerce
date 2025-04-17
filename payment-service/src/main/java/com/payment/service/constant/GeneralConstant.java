@@ -26,11 +26,12 @@ public class GeneralConstant {
     public static final String PRODUCT_ENTITY_MANAGER_FACTORY = "productEntityManagerFactory";
     public static final String PRODUCT_TRANSACTION_MANAGER = "productTransactionManager";
 
-    //Cart Get
+    //Cart Response
     public static final String CART_NOT_FOUND = "Cart Tidak Ditemukan";
 
-    //Payment Get
+    //Payment Response
     public static final String PAYMENT_NOT_FOUND = "Payment Tidak Ditemukan";
+    public static final String PAYMENT_ROLE_WRONG = "Role Anda Bukan User";
 
     //Audit Create
     public static final String AUDIT_CREATE_ACTION = "Create";

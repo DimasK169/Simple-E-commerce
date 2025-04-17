@@ -25,27 +25,22 @@ public class CartController {
 
     @PostMapping("")
     public RestApiResponse<CartSaveResult> addToCart(HttpServletRequest request, @RequestBody @Valid CartRequest cartRequest) throws JsonProcessingException {
-        return cartService.addToCart((String) request.getAttribute("userRole"), cartRequest);
+        return cartService.addToCart((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"), cartRequest);
     }
 
     @PutMapping("")
     public RestApiResponse<CartSaveResult> updateQuantityCart(HttpServletRequest request, @RequestBody @Valid CartRequest cartRequest) throws JsonProcessingException {
-        return cartService.updateQuantityCart((String) request.getAttribute("userRole"), cartRequest);
-    }
-
-    @PutMapping(CART_READY_API_PATH)
-    public RestApiResponse<List<CartUpdateResult>> updateReadyStatusCart(HttpServletRequest request, @RequestBody @Valid CartRequest cartRequest) throws JsonProcessingException{
-        return cartService.updateReadyStateCart((String) request.getAttribute("userRole"), cartRequest);
+        return cartService.updateQuantityCart((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"), cartRequest);
     }
 
     @DeleteMapping("")
     public RestApiResponse deleteCart(HttpServletRequest request, @RequestBody @Valid CartRequest cartRequest) throws JsonProcessingException {
-        return cartService.deleteCart((String) request.getAttribute("userRole"), cartRequest);
+        return cartService.deleteCart((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"), cartRequest);
     }
 
     @GetMapping("")
     public RestApiResponse<List<CartGetResult>> getAllCart(HttpServletRequest request, @RequestBody @Valid CartRequest cartRequest)throws JsonProcessingException{
-        return cartService.getCartByUserEmailAndProductCode((String) request.getAttribute("userRole"), cartRequest);
+        return cartService.getCartByUserEmailAndProductCode((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"), cartRequest);
     }
 
 }

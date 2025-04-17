@@ -28,8 +28,8 @@ public class CartEntity {
     private String productName;
     private Integer cartQuantity;
     private Integer cartTotalPrice;
+    private String paymentNumber;
     private String fsCode;
-    private Boolean isReadyToPay;
     private Boolean isPayed;
     private Boolean isFailed;
     private Date cartCreatedDate;

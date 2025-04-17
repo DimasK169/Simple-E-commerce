@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payment.service.dto.request.AuditTrailsRequest;
 import com.payment.service.dto.request.PaymentRequest;
 import com.payment.service.dto.response.RestApiResponse;
+import com.payment.service.dto.result.PaymentProductSaved;
 import com.payment.service.dto.result.PaymentSaveResult;
 import com.payment.service.entity.cart.CartEntity;
 import com.payment.service.entity.payment.PaymentEntity;
@@ -56,13 +57,16 @@ public class PaymentServiceImplementation implements PaymentService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
-    public RestApiResponse<PaymentSaveResult> createPayment(PaymentRequest paymentRequest) throws JsonProcessingException, ParseException {
+    public RestApiResponse<PaymentSaveResult> createPayment(String userRole, String userEmail, PaymentRequest paymentRequest) throws JsonProcessingException, ParseException {
 
         List<String> errors = new ArrayList<>();
         try{
-            List<CartEntity> cartEntity = cartRepository.findByUserEmail(paymentRequest.getUserEmail(), true, false, false);
+
+            if (!userRole.equals("User")) errors.add(PAYMENT_ROLE_WRONG);
+
+            List<CartEntity> cartEntity = cartRepository.findByUserEmail(userEmail, "N/A", false, false);
             if(cartEntity.isEmpty()){
-               throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList("Payment Dengan User Email: " + paymentRequest.getUserEmail()));
+               throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
             }
 
             Integer totalPrice = 0;
@@ -121,7 +125,7 @@ public class PaymentServiceImplementation implements PaymentService {
             PaymentEntity paymentEntity = existingPayment.get();
 
             if (transactionStatus.equals("settlement")){
-                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(existingPayment.get().getUserEmail(), existingPayment.get().getPaymentNumber(), true, false, false);
+                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(existingPayment.get().getUserEmail(), existingPayment.get().getPaymentNumber(), false, false);
                 for (CartEntity updateCart : cartEntities){
                     updateCart.setIsPayed(true);
                     updateCart.setCartUpdatedDate(new Date());
@@ -133,7 +137,7 @@ public class PaymentServiceImplementation implements PaymentService {
             }
 
             if (transactionStatus.equals("expire")){
-                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(existingPayment.get().getUserEmail(), existingPayment.get().getPaymentNumber(),true, false, false);
+                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(existingPayment.get().getUserEmail(), existingPayment.get().getPaymentNumber(),false, false);
                 for (CartEntity updateCart : cartEntities){
                     updateCart.setIsFailed(true);
                     updateCart.setCartUpdatedDate(new Date());
@@ -158,31 +162,47 @@ public class PaymentServiceImplementation implements PaymentService {
     }
 
     @Override
-    public RestApiResponse<List<PaymentSaveResult>> getUnfinishedPayment(PaymentRequest paymentRequest){
+    public RestApiResponse<List<PaymentSaveResult>> getUnfinishedPayment(String userRole, String userEmail, String status) {
 
         List<String> errors = new ArrayList<>();
 
-        try{
+        try {
+            if (!userRole.equals("User")) errors.add(PAYMENT_ROLE_WRONG);
 
-            List<PaymentEntity> paymentEntities = paymentRepository.findPaymentByEmailAndStatus(paymentRequest.getUserEmail(), paymentRequest.getPaymentStatus());
+            List<PaymentEntity> paymentEntities = paymentRepository.findPaymentByEmailAndStatus(userEmail, status);
             if (paymentEntities.isEmpty()) errors.add(PAYMENT_NOT_FOUND);
 
             List<PaymentSaveResult> results = new ArrayList<>();
 
-            for (PaymentEntity getPayment : paymentEntities){
-                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(paymentRequest.getUserEmail(), paymentRequest.getPaymentNumber(), true, false,false);
-                if (cartEntities.isEmpty()) errors.add(CART_NOT_FOUND);
+            for (PaymentEntity getPayment : paymentEntities) {
+                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(
+                        userEmail,
+                        getPayment.getPaymentNumber(),false, false
+                );
 
-                for (CartEntity getCart : cartEntities){
-                    PaymentSaveResult result = getPayment(getPayment);
-                    result.setProductQuantity(getCart.getCartQuantity());
-                    result.setProductName(getCart.getProductName());
-                    result.setCartTotalPricePerItem(getCart.getCartTotalPrice());
-                    results.add(result);
+                if (cartEntities.isEmpty()) {
+                    errors.add(CART_NOT_FOUND);
+                    continue;
                 }
+
+                Integer totalPrice = 0;
+                List<PaymentProductSaved> savedProduct = new ArrayList<>();
+
+                for (CartEntity getCart : cartEntities) {
+                    PaymentProductSaved product = new PaymentProductSaved();
+                    product.setProductQuantity(getCart.getCartQuantity().toString());
+                    product.setProductName(getCart.getProductName());
+                    product.setCartTotalPricePerItem(getCart.getCartTotalPrice().toString());
+                    totalPrice += getCart.getCartTotalPrice();
+                    savedProduct.add(product);
+                }
+
+                PaymentSaveResult result = getPayment(getPayment, totalPrice);
+                result.setProduct(savedProduct);
+                results.add(result);
             }
 
-            if (!errors.isEmpty()){
+            if (!errors.isEmpty()) {
                 throw new CustomIllegalArgumentException("Validation Error", errors);
             }
 
@@ -192,18 +212,20 @@ public class PaymentServiceImplementation implements PaymentService {
                     .data(results)
                     .build();
 
-        } catch (CustomIllegalArgumentException e){
+        } catch (CustomIllegalArgumentException e) {
             throw e;
         }
     }
 
-    public RestApiResponse<List<PaymentSaveResult>> getFinishedPayment(PaymentRequest paymentRequest){
+    @Override
+    public RestApiResponse<List<PaymentSaveResult>> getFinishedPayment(String userRole, String userEmail) {
 
         List<String> errors = new ArrayList<>();
 
-        try{
+        try {
+            if (!userRole.equals("User")) errors.add(PAYMENT_ROLE_WRONG);
 
-            List<PaymentEntity> allPayments = paymentRepository.findPaymentByEmail(paymentRequest.getUserEmail());
+            List<PaymentEntity> allPayments = paymentRepository.findPaymentByEmail(userEmail);
             if (allPayments.isEmpty()) errors.add(PAYMENT_NOT_FOUND);
 
             List<PaymentEntity> paymentEntities = allPayments.stream()
@@ -213,21 +235,39 @@ public class PaymentServiceImplementation implements PaymentService {
 
             List<PaymentSaveResult> results = new ArrayList<>();
 
-            for (PaymentEntity getPayment : paymentEntities){
-                System.out.println(getPayment.getPaymentStatus() + " " + getPayment.getPaymentNumber());
-                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(paymentRequest.getUserEmail(), getPayment.getPaymentNumber(), true, true, false);
-                if (cartEntities.isEmpty()) errors.add(CART_NOT_FOUND);
 
-                for (CartEntity getCart : cartEntities){
-                    PaymentSaveResult result = getPayment(getPayment);
-                    result.setProductQuantity(getCart.getCartQuantity());
-                    result.setProductName(getCart.getProductName());
-                    result.setCartTotalPricePerItem(getCart.getCartTotalPrice());
-                    results.add(result);
+            for (PaymentEntity getPayment : paymentEntities) {
+                System.out.println(getPayment.getPaymentStatus() + " " + getPayment.getPaymentNumber());
+
+                List<CartEntity> cartEntities;
+                if (getPayment.getPaymentStatus().equalsIgnoreCase("settlement")) {
+                    cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), true, false);
+                } else {
+                    cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), false, true);
                 }
+
+                if (cartEntities.isEmpty()) {
+                    errors.add(CART_NOT_FOUND);
+                    continue;
+                }
+
+                Integer totalPrice = 0;
+                List<PaymentProductSaved> savedProduct = new ArrayList<>();
+                for (CartEntity getCart : cartEntities) {
+                    PaymentProductSaved products = new PaymentProductSaved();
+                    products.setProductQuantity(getCart.getCartQuantity().toString());
+                    products.setProductName(getCart.getProductName());
+                    products.setCartTotalPricePerItem(getCart.getCartTotalPrice().toString());
+                    totalPrice += getCart.getCartTotalPrice();
+                    savedProduct.add(products);
+                }
+
+                PaymentSaveResult result = getPayment(getPayment, totalPrice);
+                result.setProduct(savedProduct);
+                results.add(result);
             }
 
-            if (!errors.isEmpty()){
+            if (!errors.isEmpty()) {
                 throw new CustomIllegalArgumentException("Validation Error", errors);
             }
 
@@ -237,10 +277,12 @@ public class PaymentServiceImplementation implements PaymentService {
                     .data(results)
                     .build();
 
-        } catch (CustomIllegalArgumentException e){
+        } catch (CustomIllegalArgumentException e) {
             throw e;
         }
     }
+
+
     private String encodeServerKey() {
         return java.util.Base64.getEncoder().encodeToString((midtransKey + ":").getBytes());
     }
@@ -298,19 +340,19 @@ public class PaymentServiceImplementation implements PaymentService {
                 .build();
     }
 
-    private PaymentSaveResult getPayment(PaymentEntity payment){
+    private PaymentSaveResult getPayment(PaymentEntity payment, Integer totalPrice){
         return PaymentSaveResult.builder()
                 .paymentNumber(payment.getPaymentNumber())
                 .paymentStatus(payment.getPaymentStatus())
                 .paymentType(payment.getPaymentType())
-                .cartTotalPrice(payment.getPaymentPrice())
+                .cartTotalPrice(totalPrice)
                 .paymentStartDate(payment.getPaymentStartDate())
                 .paymentEndDate(payment.getPaymentEndDate())
                 .paymentCreatedDate(payment.getPaymentCreatedDate())
                 .build();
     }
-    private void
-    insertAuditTrails(PaymentRequest paymentRequest, PaymentSaveResult paymentSaveResult, ResponseEntity<Map> response) throws JsonProcessingException {
+
+    private void insertAuditTrails(PaymentRequest paymentRequest, PaymentSaveResult paymentSaveResult, ResponseEntity<Map> response) throws JsonProcessingException {
         System.out.println("psr" + paymentRequest + "response" + response);
         ObjectMapper mapper = new ObjectMapper();
         auditTrailsService.insertAuditTrails(AuditTrailsRequest.builder()

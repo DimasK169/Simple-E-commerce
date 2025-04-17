@@ -13,10 +13,10 @@ import java.util.Optional;
 @Repository
 public interface CartRepository extends JpaRepository<CartEntity, Long> {
 
-    @Query("Select t From CartEntity t Where t.userEmail=:userEmail and t.productCode=:productCode and t.isReadyToPay=:isReadyToPay and t.isPayed=:isPayed and t.isFailed=:isFailed")
-    Optional<CartEntity> findByUserEmailAndProductCode(String userEmail, String productCode, Boolean isReadyToPay, Boolean isPayed, Boolean isFailed);
+    @Query("Select t From CartEntity t Where t.userEmail=:userEmail and t.paymentNumber=:paymentNumber and t.isPayed=:isPayed and t.isFailed=:isFailed")
+    List<CartEntity> findByUserEmail(String userEmail, String paymentNumber, Boolean isPayed, Boolean isFailed);
 
-    @Query("Select t From CartEntity t Where t.userEmail=:userEmail and t.isReadyToPay=:isReadyToPay and t.isPayed=:isPayed and t.isFailed=:isFailed")
-    List<CartEntity> findByUserEmail(String userEmail, Boolean isReadyToPay, Boolean isPayed, Boolean isFailed);
+    @Query("Select t From CartEntity t Where t.userEmail=:userEmail and t.productCode=:productCode and t.paymentNumber=:paymentNumber and t.isPayed=:isPayed and t.isFailed=:isFailed")
+    Optional<CartEntity> findByUserEmailAndProductCodeAndPaymentNumber(String userEmail, String productCode,String paymentNumber, Boolean isPayed, Boolean isFailed);
 
 }

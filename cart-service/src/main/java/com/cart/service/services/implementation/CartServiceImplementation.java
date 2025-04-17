@@ -55,17 +55,19 @@ public class CartServiceImplementation implements CartService {
     AuditTrailsService auditTrailsService;
 
     @Override
-    public RestApiResponse<CartSaveResult> addToCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException {
+    public RestApiResponse<CartSaveResult> addToCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException {
 
         try {
             List<String> errors = new ArrayList<>();
 
-            if (!jwtPayload.equals("User")){
+            if (!userRole.equals("User")){
                 errors.add(CART_MESSAGE_WRONG_ROLE);
             }
 
+            System.out.println("email" + userEmail);
+
             Optional<Product> product = productRepository.findProductByCode(cartRequest.getProductCode());
-            Optional<Users> user = userRepository.findByUserEmail(cartRequest.getUserEmail());
+            Optional<Users> user = userRepository.findByUserEmail(userEmail);
 
             if (product.isEmpty()) errors.add(PRODUCT_NOT_FOUND);
             if (user.isEmpty()) errors.add(USER_NOT_FOUND);
@@ -73,12 +75,12 @@ public class CartServiceImplementation implements CartService {
             Product existingProduct = product.get();
             Users existingUser = user.get();
 
-            Optional<CartEntity> existingCart = cartRepository.findByUserEmailAndProductCode(
-                    existingUser.getUserEmail(), existingProduct.getProductCode(), false, false, false);
+            Optional<CartEntity> existingCart = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber(
+                    existingUser.getUserEmail(), existingProduct.getProductCode(), "N/A", false, false);
 
             //Melakukan penyaringan jika cart telah ada di dalam tabel
             if (existingCart.isPresent()) {
-                return updateQuantityCart(jwtPayload, cartRequest);
+                return updateQuantityCart(userRole, userEmail, cartRequest);
             }
 
             CartEntity cartEntity = createCartEntity(cartRequest, existingUser, existingProduct);
@@ -114,7 +116,7 @@ public class CartServiceImplementation implements CartService {
 
             insertAuditTrail(cartRequest, result, AUDIT_CREATE_DESC_ACTION_SUCCESS, AUDIT_CREATE_ACTION);
 
-            getCartByUserEmailAndProductCode(jwtPayload, cartRequest);
+            getCartByUserEmailAndProductCode(userRole, userEmail, cartRequest);
 
             return RestApiResponse.<CartSaveResult>builder()
                     .code(HttpStatus.CREATED.toString())
@@ -130,20 +132,20 @@ public class CartServiceImplementation implements CartService {
     }
 
     @Override
-    public RestApiResponse<CartSaveResult> updateQuantityCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException {
+    public RestApiResponse<CartSaveResult> updateQuantityCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException {
 
         try{
             List<String> errors = new ArrayList<>();
             List<CartSaveResult> responseList = new ArrayList<>();
 
-            if (!jwtPayload.equals("User")){
+            if (!userRole.equals("User")){
                 errors.add(CART_MESSAGE_WRONG_ROLE);
             }
 
             Optional<Product> product = productRepository.findProductByCode(cartRequest.getProductCode());
             if(product.isEmpty()) errors.add(PRODUCT_NOT_FOUND);
 
-            Optional<CartEntity> cart = cartRepository.findByUserEmailAndProductCode(cartRequest.getUserEmail(), cartRequest.getProductCode(), false, false, false);
+            Optional<CartEntity> cart = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber(userEmail, cartRequest.getProductCode(), "N/A", false, false);
             if (cart.isEmpty()) {
                 errors.add(CART_NOT_FOUND);
             } else {
@@ -201,67 +203,15 @@ public class CartServiceImplementation implements CartService {
     }
 
     @Override
-    public RestApiResponse<List<CartUpdateResult>> updateReadyStateCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException {
-
-        try {
-
-            List<String> errors = new ArrayList<>();
-
-            if (!"User".equals(jwtPayload)) errors.add(CART_MESSAGE_WRONG_ROLE);
-
-            List<CartEntity> cartList = cartRepository.findByUserEmail(cartRequest.getUserEmail(), false, false, false);
-            if (cartList.isEmpty()) errors.add(CART_NOT_FOUND);
-
-            List<CartUpdateResult> resultList = new ArrayList<>();
-
-            for (CartEntity cart : cartList){
-                cart.setIsReadyToPay(true);
-                cart.setCartUpdatedDate(new Date());
-                CartEntity updatedCart = cartRepository.save(cart);
-
-                CartUpdateResult result = buildCartUpdateResult(updatedCart);
-                resultList.add(result);
-
-                List<Product> productList = productRepository.findManyProductByCode(cart.getProductCode());
-                if (productList.isEmpty()) errors.add(PRODUCT_NOT_FOUND);
-
-                for (Product updateProduct: productList){
-                    Integer updatedStocks = updateProduct.getProductStock() - cart.getCartQuantity();
-                    updateProduct.setProductStock(updatedStocks);
-                    updateProduct.setUpdatedDate(new Date());
-                    Product save = productRepository.save(updateProduct);
-                }
-
-                insertAuditTrail(cartRequest, resultList, AUDIT_UPDATE_DESC_ACTION_SUCCESS, AUDIT_UPDATE_ACTION);
-
-            }
-
-            if (!errors.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", errors);
-
-            return RestApiResponse.<List<CartUpdateResult>>builder()
-                    .code(HttpStatus.OK.toString())
-                    .message(AUDIT_UPDATE_DESC_ACTION_SUCCESS)
-                    .data(resultList)
-                    .error(null)
-                    .build();
-
-        } catch (IllegalArgumentException e){
-            insertAuditTrail(cartRequest, null, AUDIT_UPDATE_DESC_ACTION_FAILED, AUDIT_UPDATE_ACTION);
-            throw e;
-        }
-
-    }
-
-    @Override
     @Transactional
-    public RestApiResponse deleteCart(String jwtPayload, CartRequest cartRequest) throws JsonProcessingException {
+    public RestApiResponse deleteCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException {
 
         try {
-            if (!"User".equals(jwtPayload)){
+            if (!"User".equals(userRole)){
                 throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_MESSAGE_WRONG_ROLE));
             }
 
-            Optional<CartEntity> cart = cartRepository.findByUserEmailAndProductCode(cartRequest.getUserEmail(), cartRequest.getProductCode(), false, false,false);
+            Optional<CartEntity> cart = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber(userEmail, cartRequest.getProductCode(), "N/A", false,false);
             if (cart.isEmpty()){
                 throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
             }
@@ -284,14 +234,14 @@ public class CartServiceImplementation implements CartService {
     }
 
     @Override
-    public RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String jwtPayload, CartRequest cartRequest)throws JsonProcessingException{
+    public RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String userRole, String userEmail, CartRequest cartRequest)throws JsonProcessingException{
         List<String> errors = new ArrayList<>();
         try{
-            if (!"User".equals(jwtPayload))errors.add(CART_MESSAGE_WRONG_ROLE);
+            if (!"User".equals(userRole))errors.add(CART_MESSAGE_WRONG_ROLE);
 
             List<CartGetResult> result = new ArrayList<>();
 
-            List<CartEntity> cart = cartRepository.findByUserEmail(cartRequest.getUserEmail(),  false, false, false);
+            List<CartEntity> cart = cartRepository.findByUserEmail(userEmail, "N/A", false, false);
             if (cart.isEmpty()) errors.add(CART_NOT_FOUND);
 
             Integer totalPrice = 0;
@@ -331,7 +281,7 @@ public class CartServiceImplementation implements CartService {
                 .productName(product.getProductName())
                 .productCode(product.getProductCode())
                 .cartQuantity(request.getCartQuantity())
-                .isReadyToPay(false)
+                .paymentNumber("N/A")
                 .isPayed(false)
                 .isFailed(false)
                 .cartCreatedDate(new Date())
@@ -345,7 +295,6 @@ public class CartServiceImplementation implements CartService {
                 .fsCode(cart.getFsCode())
                 .cartQuantity(cart.getCartQuantity())
                 .cartTotalPrice(cart.getCartTotalPrice())
-                .isReadyToPay(cart.getIsReadyToPay())
                 .isPayed(cart.getIsPayed())
                 .isFailed(cart.getIsFailed())
                 .cartCreatedDate(cart.getCartCreatedDate())
@@ -360,7 +309,6 @@ public class CartServiceImplementation implements CartService {
                 .productName(cart.getProductName())
                 .cartQuantity(cart.getCartQuantity())
                 .cartTotalPrice(cart.getCartTotalPrice())
-                .isReadyToPay(cart.getIsReadyToPay())
                 .cartUpdatedDate(cart.getCartUpdatedDate())
                 .build();
     }

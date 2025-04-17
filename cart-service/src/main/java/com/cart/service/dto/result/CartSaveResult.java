@@ -20,6 +20,7 @@ public class CartSaveResult {
     private String productName;
 
     @JsonProperty("Fs_Code")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String fsCode;
 
     @JsonProperty("Cart_Quantity")
@@ -27,12 +28,6 @@ public class CartSaveResult {
 
     @JsonProperty("Cart_Total_Price")
     private Integer cartTotalPrice;
-
-    @JsonProperty("Cart_Deleted")
-    private Boolean isDeleted;
-
-    @JsonProperty("Cart_Ready")
-    private Boolean isReadyToPay;
 
     @JsonProperty("Cart_Payed")
     private Boolean isPayed;
