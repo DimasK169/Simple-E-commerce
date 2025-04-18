@@ -39,8 +39,8 @@ public class CartController {
     }
 
     @GetMapping("")
-    public RestApiResponse<List<CartGetResult>> getAllCart(HttpServletRequest request, @RequestBody @Valid CartRequest cartRequest)throws JsonProcessingException{
-        return cartService.getCartByUserEmailAndProductCode((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"), cartRequest);
+    public RestApiResponse<List<CartGetResult>> getAllCart(HttpServletRequest request)throws JsonProcessingException{
+        return cartService.getCartByUserEmailAndProductCode((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"));
     }
 
 }

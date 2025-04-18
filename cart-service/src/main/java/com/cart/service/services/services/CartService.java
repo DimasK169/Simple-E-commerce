@@ -16,6 +16,6 @@ public interface CartService {
     RestApiResponse<CartSaveResult> addToCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException;
     RestApiResponse<CartSaveResult> updateQuantityCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException;
     RestApiResponse deleteCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException;
-    RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String userRole, String userEmail, CartRequest cartRequest)throws JsonProcessingException;
+    RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String userRole, String userEmail)throws JsonProcessingException;
 
 }

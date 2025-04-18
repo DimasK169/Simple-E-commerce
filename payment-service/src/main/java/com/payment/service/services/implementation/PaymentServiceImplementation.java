@@ -230,7 +230,7 @@ public class PaymentServiceImplementation implements PaymentService {
 
             List<PaymentEntity> paymentEntities = allPayments.stream()
                     .filter(p -> p.getPaymentStatus().equalsIgnoreCase("settlement") ||
-                            p.getPaymentStatus().equalsIgnoreCase("expired"))
+                            p.getPaymentStatus().equalsIgnoreCase("expire"))
                     .collect(Collectors.toList());
 
             List<PaymentSaveResult> results = new ArrayList<>();
@@ -348,6 +348,7 @@ public class PaymentServiceImplementation implements PaymentService {
                 .cartTotalPrice(totalPrice)
                 .paymentStartDate(payment.getPaymentStartDate())
                 .paymentEndDate(payment.getPaymentEndDate())
+                .paymentThirdParty(payment.getPaymentThirdParty())
                 .paymentCreatedDate(payment.getPaymentCreatedDate())
                 .build();
     }

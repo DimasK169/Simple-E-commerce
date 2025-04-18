@@ -1,7 +1,6 @@
 package com.cart.service.services.implementation;
 
 import com.cart.service.dto.result.CartGetResult;
-import com.cart.service.dto.result.CartUpdateResult;
 import com.cart.service.entity.flashsale.FlashSale;
 import com.cart.service.entity.flashsale.TrxFlashSale;
 import com.cart.service.entity.product.Product;
@@ -115,8 +114,6 @@ public class CartServiceImplementation implements CartService {
             CartSaveResult result = buildCartSaveResult(savedCart);
 
             insertAuditTrail(cartRequest, result, AUDIT_CREATE_DESC_ACTION_SUCCESS, AUDIT_CREATE_ACTION);
-
-            getCartByUserEmailAndProductCode(userRole, userEmail, cartRequest);
 
             return RestApiResponse.<CartSaveResult>builder()
                     .code(HttpStatus.CREATED.toString())
@@ -234,7 +231,7 @@ public class CartServiceImplementation implements CartService {
     }
 
     @Override
-    public RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String userRole, String userEmail, CartRequest cartRequest)throws JsonProcessingException{
+    public RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String userRole, String userEmail)throws JsonProcessingException{
         List<String> errors = new ArrayList<>();
         try{
             if (!"User".equals(userRole))errors.add(CART_MESSAGE_WRONG_ROLE);
@@ -253,14 +250,15 @@ public class CartServiceImplementation implements CartService {
 
                 totalPrice += getCart.getCartTotalPrice();
 
-                CartGetResult resultAudit = buildCartGetResult(getCart, getProduct, totalPrice);
+                CartGetResult resultAudit = buildCartGetResult(getCart, getProduct);
                 result.add(resultAudit);
 
-                insertAuditTrail(cartRequest, resultAudit, AUDIT_GET_DESC_ACTION_SUCCESS ,AUDIT_GET_ACTION);
+                insertAuditTrail(null , resultAudit, AUDIT_GET_DESC_ACTION_SUCCESS ,AUDIT_GET_ACTION);
 
             }
 
-            System.out.println(result);
+            CartGetResult cartTotalPrice = CartGetResult.builder().cartTotalPrice(totalPrice).build();
+            result.add(cartTotalPrice);
 
             return RestApiResponse.<List<CartGetResult>>builder()
                     .code(HttpStatus.OK.toString())
@@ -301,27 +299,16 @@ public class CartServiceImplementation implements CartService {
                 .build();
     }
 
-    private CartUpdateResult buildCartUpdateResult(CartEntity cart){
-        return CartUpdateResult.builder()
-                .userId(cart.getUserId())
-                .userEmail(cart.getUserEmail())
-                .productId(cart.getProductId())
-                .productName(cart.getProductName())
-                .cartQuantity(cart.getCartQuantity())
-                .cartTotalPrice(cart.getCartTotalPrice())
-                .cartUpdatedDate(cart.getCartUpdatedDate())
-                .build();
-    }
-
-    private CartGetResult buildCartGetResult(CartEntity cart, Product product, Integer totalPrice){
+    private CartGetResult buildCartGetResult(CartEntity cart, Product product){
         return CartGetResult.builder()
                 .productName(cart.getProductName())
                 .productDesc(product.getProductDescription())
                 .productImage(product.getProductImage())
                 .productPrice(product.getProductPrice())
                 .cartTotalPricePerItem(cart.getCartTotalPrice())
-                .cartTotalPrice(totalPrice)
                 .cartQuantity(cart.getCartQuantity())
+                .fsCode(cart.getFsCode())
+                .productCode(cart.getProductCode())
                 .createdDate(new Date())
                 .build();
     }
