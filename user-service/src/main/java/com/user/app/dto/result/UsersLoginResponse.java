@@ -14,7 +14,8 @@ public class UsersLoginResponse {
     private String userPassword;
     @JsonProperty("User_Name")
     private String userName;
+    @JsonProperty("User_Role")
+    private String userRole;
     @JsonProperty("User_Token")
     private String userToken;
-
 }

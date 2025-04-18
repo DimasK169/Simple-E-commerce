@@ -11,6 +11,5 @@ import java.util.Optional;
 public interface TrxFlashSaleRepository extends JpaRepository<TrxFlashSale, Long> {
 
     List<TrxFlashSale> findByFsId(Long fsId);
-
     Optional<TrxFlashSale> findByProductIdAndFsCode(Long productId, String fsCode);
 }

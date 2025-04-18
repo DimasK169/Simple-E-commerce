@@ -22,8 +22,14 @@ public class FlashSaleUpdateResponse {
     @JsonProperty("FlashSale_Discount")
     private Double trxDiscount;
 
+    @JsonProperty("Product_Price")
+    private Integer productPrice;
+
     @JsonProperty("FlashSale_Price")
     private Integer trxPrice;
+
+    @JsonProperty("Product_Image")
+    private String productImage;
 
     @JsonProperty("FlashSale_StartDate")
     private Date fsStartDate;

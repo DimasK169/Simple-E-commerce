@@ -54,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
         UsersLoginResponse usersLoginResponse = UsersLoginResponse.builder()
                 .userEmail(users.getUserEmail())
                 .userName(users.getUserName())
+                .userRole(users.getUserRole())
                 .userToken(token)
                 .build();
 

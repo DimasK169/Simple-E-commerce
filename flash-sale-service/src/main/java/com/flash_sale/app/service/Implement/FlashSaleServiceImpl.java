@@ -18,6 +18,7 @@ import com.pusher.rest.Pusher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,8 @@ import java.util.Optional;
 
 @Service
 public class FlashSaleServiceImpl implements FlashSaleService {
+
+    String baseUrl = "http://localhost:8080";
 
     @Autowired
     private FlashSaleRepository flashSaleRepository;
@@ -229,6 +232,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
             throw new IllegalArgumentException("Invalid Flash-Sale Code");
         }
 
+
         List<FlashSaleUpdateResponse> responseList = new ArrayList<>();
 
         for (FlashSale flashSale : fsList) {
@@ -251,6 +255,8 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .fsIsDelete(flashSale.getFsIsDelete())
                         .trxDiscount(trx.getTrxDiscount())
                         .trxPrice(trx.getTrxPrice())
+                        .productPrice(product.getProductPrice())
+                        .productImage(baseUrl + "/images/" + product.getProductImage())
                         .status("Fetched")
                         .build();
 
@@ -275,14 +281,55 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     }
 
     @Override
-    public RestApiResponse<Page<FlashSale>> getAllFlashSale(int page, int size) {
+    public RestApiResponse<Page<FlashSaleUpdateResponse>> getAllFlashSale(int page, int size) {
         Page<FlashSale> pageData = flashSaleRepository.findAllByFsIsDeleteFalse(PageRequest.of(page, size));
-        return RestApiResponse.<Page<FlashSale>>builder()
+
+        List<FlashSaleUpdateResponse> responseList = new ArrayList<>();
+
+        for (FlashSale flashSale : pageData.getContent()) {
+            List<TrxFlashSale> trxList = trxFlashSaleRepository.findByFsId(flashSale.getFsId());
+
+            for (TrxFlashSale trx : trxList) {
+                Optional<Product> productOpt = productRepository.findById(trx.getProductId());
+                if (productOpt.isEmpty()) continue;
+
+                Product product = productOpt.get();
+
+                FlashSaleUpdateResponse response = FlashSaleUpdateResponse.builder()
+                        .fsName(flashSale.getFsName())
+                        .fsCode(flashSale.getFsCode())
+                        .fsProduct(flashSale.getFsProduct())
+                        .fsStartDate(flashSale.getFsStartDate())
+                        .fsEndDate(flashSale.getFsEndDate())
+                        .fsCreatedBy(flashSale.getFsCreatedBy())
+                        .fsUpdateDate(flashSale.getFsUpdateDate())
+                        .fsIsDelete(flashSale.getFsIsDelete())
+                        .trxDiscount(trx.getTrxDiscount())
+                        .trxPrice(trx.getTrxPrice())
+                        .productPrice(product.getProductPrice())
+                        .productImage(baseUrl + "/images/" + product.getProductImage())
+                        .status("Fetched")
+                        .build();
+
+                responseList.add(response);
+            }
+        }
+
+        // Construct a new Page object with the transformed list
+        Page<FlashSaleUpdateResponse> responsePage = new PageImpl<>(
+                responseList,
+                PageRequest.of(page, size),
+                pageData.getTotalElements()
+        );
+
+        return RestApiResponse.<Page<FlashSaleUpdateResponse>>builder()
                 .code("200")
-                .message("Flash Sale retrieved successfully")
-                .data(pageData)
+                .message("Berhasil menampilkan semua data flash sale")
+                .data(responsePage)
                 .build();
     }
+
+
 
     public List<FlashSale> getFsCode(String fsCode) {
         return flashSaleRepository.findByFsCode(fsCode);

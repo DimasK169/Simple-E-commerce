@@ -43,7 +43,7 @@ public class FlashSaleController {
     }
 
     @GetMapping("/get")
-    public RestApiResponse<Page<FlashSale>> getAllFlashSale(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public RestApiResponse<Page<FlashSaleUpdateResponse>> getAllFlashSale(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return flashSaleService.getAllFlashSale(page, size);
     }
 }
