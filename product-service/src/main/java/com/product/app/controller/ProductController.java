@@ -57,12 +57,12 @@ public class ProductController {
     }
 
     @GetMapping
-    public RestApiResponse<Page<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         return productService.getAllProducts(page, size);
     }
 
     @GetMapping("/search")
-    public RestApiResponse<Page<Product>> searchProducts(
+    public RestApiResponse<Page<ProductUpdateResponse>> searchProducts(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {

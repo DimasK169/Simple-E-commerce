@@ -1,9 +1,8 @@
-package com.product.app.configuration;
+package com.flash_sale.app.configuration;
 
-import com.product.app.security.JwtAuthFilter;
+import com.flash_sale.app.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,8 +17,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/**", "/images/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/product", "/product/search").permitAll()
+                        .requestMatchers("/flash-sale/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);

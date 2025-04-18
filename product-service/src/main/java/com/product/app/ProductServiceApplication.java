@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ProductServiceApplication {
 
 	//TODO UNIT TESTING
-	//TODO Store Gambar
 	public static void main(String[] args) {
 		SpringApplication.run(ProductServiceApplication.class, args);
 	}

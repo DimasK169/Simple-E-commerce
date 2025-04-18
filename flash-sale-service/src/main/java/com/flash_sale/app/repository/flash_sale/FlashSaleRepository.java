@@ -16,9 +16,7 @@ public interface FlashSaleRepository extends JpaRepository<FlashSale, Long> {
 
     @Query("SELECT t FROM FlashSale t WHERE t.fsCode = :fsCode")
     List<FlashSale> findByFsCode(@Param("fsCode") String fsCode);
-
     Optional<FlashSale> findByFsCodeAndFsProduct(String fsCode, String fsProduct);
-
     Page<FlashSale> findAllByFsIsDeleteFalse(Pageable pageable);
 
 }

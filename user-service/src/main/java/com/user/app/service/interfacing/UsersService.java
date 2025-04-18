@@ -11,6 +11,4 @@ public interface UsersService {
 
     RestApiResponse<UsersSaveResponse> getUsersByEmail(String userEmail);
 
-    RestApiResponse<UsersUpdateResponse> deleteUsers(String userEmail);
-
 }

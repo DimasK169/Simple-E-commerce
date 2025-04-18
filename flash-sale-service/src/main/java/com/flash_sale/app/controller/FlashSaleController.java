@@ -42,8 +42,8 @@ public class FlashSaleController {
         return flashSaleService.getByFlashSaleCode(fsCode);
     }
 
-    @GetMapping
-    public RestApiResponse<Page<FlashSale>> getAllFlashSale(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    @GetMapping("/get")
+    public RestApiResponse<Page<FlashSaleUpdateResponse>> getAllFlashSale(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return flashSaleService.getAllFlashSale(page, size);
     }
 }

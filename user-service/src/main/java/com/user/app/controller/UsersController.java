@@ -31,15 +31,12 @@ public class UsersController {
         return usersService.getUsersByEmail(userEmail);
     }
 
-    @PatchMapping("/delete/{userEmail}")
-    public RestApiResponse<UsersUpdateResponse> deleteFlashSale( @PathVariable String userEmail){
-        return usersService.deleteUsers(userEmail);
-    }
-
     @PostMapping("/login")
     public RestApiResponse<UsersLoginResponse> login(@RequestBody UsersRequest usersRequest) throws Exception {
         System.out.println("LOGIN ENDPOINT HIT");
         return authService.authentication(usersRequest);
     }
+
+
 
 }

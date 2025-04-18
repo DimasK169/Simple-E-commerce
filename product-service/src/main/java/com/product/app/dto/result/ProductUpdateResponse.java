@@ -1,12 +1,16 @@
 package com.product.app.dto.result;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProductUpdateResponse {
     private String productName;
     private String productCode;

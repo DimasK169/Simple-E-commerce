@@ -37,6 +37,8 @@ public class ProductServiceImplement implements ProductService {
     @Value("${app.base-url}")
     private String baseUrl;
 
+
+
     public RestApiResponse<ProductCreateResponse> create(ProductRequest request, MultipartFile imageFile) throws IOException {
         if (productRepository.existsByProductCode(request.getProductCode())) {
             throw new IllegalArgumentException("Product code must be unique.");
@@ -177,21 +179,54 @@ public class ProductServiceImplement implements ProductService {
     }
 
     //TODO keamanan jika frontend minta 1000 size
-    public RestApiResponse<Page<Product>> getAllProducts(int page, int size) {
+    public RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(int page, int size) {
         Page<Product> pageData = productRepository.findAllByProductIsDeleteFalse(PageRequest.of(page, size));
-        return RestApiResponse.<Page<Product>>builder()
+
+        Page<ProductUpdateResponse> responsePage = pageData.map(product -> {
+            ProductUpdateResponse response = new ProductUpdateResponse();
+            response.setProductName(product.getProductName());
+            response.setProductCode(product.getProductCode());
+            response.setProductImage(baseUrl + "/images/" + product.getProductImage());
+            response.setProductDescription(product.getProductDescription());
+            response.setProductCategory(product.getProductCategory());
+            response.setProductStock(product.getProductStock());
+            response.setProductPrice(product.getProductPrice());
+            response.setProductIsAvailable(product.getProductIsAvailable());
+            response.setCreatedBy(product.getCreatedBy());
+            response.setCreatedDate(product.getCreatedDate());
+            return response;
+        });
+
+        return RestApiResponse.<Page<ProductUpdateResponse>>builder()
                 .code("200")
                 .message("Products retrieved successfully")
-                .data(pageData)
+                .data(responsePage)
                 .build();
     }
 
-    public RestApiResponse<Page<Product>> searchProducts(String keyword, Pageable pageable) {
+
+    public RestApiResponse<Page<ProductUpdateResponse>> searchProducts(String keyword, Pageable pageable) {
         Page<Product> pageData = productRepository.searchByNameOrCategory(keyword, pageable);
-        return RestApiResponse.<Page<Product>>builder()
+
+        Page<ProductUpdateResponse> responsePage = pageData.map(product -> {
+            ProductUpdateResponse response = new ProductUpdateResponse();
+            response.setProductName(product.getProductName());
+            response.setProductCode(product.getProductCode());
+            response.setProductImage(baseUrl + "/images/" + product.getProductImage());
+            response.setProductDescription(product.getProductDescription());
+            response.setProductCategory(product.getProductCategory());
+            response.setProductStock(product.getProductStock());
+            response.setProductPrice(product.getProductPrice());
+            response.setProductIsAvailable(product.getProductIsAvailable());
+            response.setCreatedBy(product.getCreatedBy());
+            response.setCreatedDate(product.getCreatedDate());
+            return response;
+        });
+
+        return RestApiResponse.<Page<ProductUpdateResponse>>builder()
                 .code("200")
                 .message("Products retrieved successfully")
-                .data(pageData)
+                .data(responsePage)
                 .build();
     }
 

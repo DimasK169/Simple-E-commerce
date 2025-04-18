@@ -1,9 +1,9 @@
-package com.user.app.security;
+package com.flash_sale.app.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.user.app.utility.KeyUtil;
+import com.flash_sale.app.utility.KeyUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,10 +23,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String path = request.getServletPath();
-        System.out.println("Request Path: " + request.getServletPath());
+        System.out.println("jwt auth");
 
-        List<String> publicPaths = List.of("/users/login", "/users/save");
+        String path = request.getServletPath();
+        List<String> publicPaths = List.of("/flash-sale/get");
 
         if (publicPaths.contains(path)) {
             filterChain.doFilter(request, response);
@@ -34,7 +34,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String authHeader = request.getHeader("Authorization");
-        System.out.println("Authorization Header: " + authHeader);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.replace("Bearer ", "");
@@ -46,13 +45,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .build()
                         .verify(token);
 
-                String username = jwt.getSubject();
+                String userEmail = jwt.getSubject();
+                String userRole = jwt.getClaim("userRole").asString();
+
+                request.setAttribute("userRole", userRole);
+
                 UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(username, null, List.of());
+                        new UsernamePasswordAuthenticationToken(userEmail, null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
+                System.out.println("auth " + auth);
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token tidak valid: " + e.getMessage());
                 return;
             }
         }

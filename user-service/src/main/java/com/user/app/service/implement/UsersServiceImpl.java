@@ -34,7 +34,6 @@ public class UsersServiceImpl implements UsersService {
                 .userAddress(usersRequest.getUserAddress())
                 .userRole(usersRequest.getUserRole())
                 .userCreatedDate(new Date())
-                .userIsActive(true)
                 .build();
 
         RestApiResponse<UsersSaveResponse> response = new RestApiResponse<>();
@@ -48,7 +47,6 @@ public class UsersServiceImpl implements UsersService {
                 .userAddress(saveUsers.getUserAddress())
                 .userRole(saveUsers.getUserRole())
                 .userCreatedDate(saveUsers.getUserCreatedDate())
-                .userIsActive(saveUsers.getUserIsActive())
                 .build();
 
         auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
@@ -68,10 +66,13 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public RestApiResponse<UsersSaveResponse> getUsersByEmail(String userEmail) {
-        Users users = usersRepository.findByUserEmail(userEmail);
+        Users t = getUsersEmail(userEmail);
+        if (t == null){
+            throw new IllegalArgumentException("Invalid Users Email");
+        }
         UsersSaveResponse usersSaveResponse = UsersSaveResponse.builder()
-                .userName(users.getUserName())
-                .userEmail(users.getUserEmail())
+                .userName(t.getUserName())
+                .userEmail(t.getUserEmail())
                 .build();
 
         auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
@@ -87,44 +88,6 @@ public class UsersServiceImpl implements UsersService {
         response.setData(usersSaveResponse);
         response.setCode(HttpStatus.OK.toString());
         response.setMessage("Berhasil Get Users");
-
-        return response;
-    }
-
-    @Override
-    public RestApiResponse<UsersUpdateResponse> deleteUsers(String userEmail) {
-        Users t = getUsersEmail(userEmail);
-        if (t == null){
-            throw new IllegalArgumentException("Invalid Users Email");
-        }
-
-        t.setUserUpdatedDate(new Date());
-        t.setUserIsActive(false);
-
-        Users saveUsers = usersRepository.save(t);
-
-        UsersUpdateResponse usersUpdateResponse = UsersUpdateResponse.builder()
-                .userName(saveUsers.getUserName())
-                .userEmail(saveUsers.getUserName())
-                .userPhone(saveUsers.getUserPhone())
-                .userAddress(saveUsers.getUserAddress())
-                .userRole(saveUsers.getUserRole())
-                .userIsActive(saveUsers.getUserIsActive())
-                .userUpdatedDate(saveUsers.getUserUpdatedDate())
-                .build();
-
-        RestApiResponse<UsersUpdateResponse> response = new RestApiResponse<>();
-        auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
-                .AtAction("Delete")
-                .AtDescription("Delete Users")
-                .AtDate(new Date())
-                .AtRequest(String.valueOf(userEmail))
-                .AtResponse(String.valueOf(usersUpdateResponse))
-                .build());
-
-        response.setData(usersUpdateResponse);
-        response.setCode(HttpStatus.OK.toString());
-        response.setMessage("Berhasil menghapus Users");
 
         return response;
     }
