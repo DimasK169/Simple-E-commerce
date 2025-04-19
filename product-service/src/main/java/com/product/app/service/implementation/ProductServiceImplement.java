@@ -7,8 +7,8 @@ import com.product.app.dto.request.ProductUpdateRequest;
 import com.product.app.dto.response.RestApiResponse;
 import com.product.app.dto.result.ProductCreateResponse;
 import com.product.app.dto.result.ProductUpdateResponse;
-import com.product.app.entity.Product;
-import com.product.app.repository.ProductRepository;
+import com.product.app.entity.product.Product;
+import com.product.app.repository.product.ProductRepository;
 import com.product.app.service.interfacing.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +44,7 @@ public class ProductServiceImplement implements ProductService {
             throw new IllegalArgumentException("Product code must be unique.");
         }
 
+
         String savedFileName = fileStorageService.storeFile(imageFile);
 
         Product product = Product.builder()
@@ -57,7 +58,7 @@ public class ProductServiceImplement implements ProductService {
                 .productIsAvailable(request.getProductIsAvailable())
                 .productIsDelete(false)
                 .createdDate(new Date())
-                .createdBy("admin 1")
+                .createdBy(request.getCreatedBy())
                 .build();
 
         Product savedProduct = productRepository.save(product);
@@ -227,6 +228,32 @@ public class ProductServiceImplement implements ProductService {
                 .code("200")
                 .message("Products retrieved successfully")
                 .data(responsePage)
+                .build();
+    }
+
+    @Override
+    public RestApiResponse<ProductUpdateResponse> getbyCode(String productCode) {
+        Product product = getProductCode(productCode);
+        if(product == null){
+            throw new IllegalArgumentException("Invalid product Name");
+        }
+
+        ProductUpdateResponse productResponse = ProductUpdateResponse.builder()
+                .productName(product.getProductName())
+                .productCode(product.getProductCode())
+                .productDescription(product.getProductDescription())
+                .productCategory(product.getProductCategory())
+                .productImage(baseUrl + "/images/" + product.getProductImage())
+                .productPrice(product.getProductPrice())
+                .productIsAvailable(product.getProductIsAvailable())
+                .productIsDelete(product.getProductIsDelete())
+                .productStock(product.getProductStock())
+                .build();
+
+        return RestApiResponse.<ProductUpdateResponse>builder()
+                .code("200")
+                .message("Products retrieved successfully")
+                .data(productResponse)
                 .build();
     }
 

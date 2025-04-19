@@ -3,13 +3,19 @@ package com.user.app.service.implement;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.user.app.dto.request.UsersRequest;
+import com.user.app.dto.response.RestApiError;
 import com.user.app.dto.response.RestApiResponse;
 import com.user.app.dto.result.UsersLoginResponse;
 import com.user.app.entity.Users;
+import com.user.app.exceptions.UnauthorizedException;
 import com.user.app.repository.UsersRepository;
 import com.user.app.service.interfacing.AuthService;
 import com.user.app.utility.KeyUtil;
+import com.user.app.utility.jwtUtility;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.interfaces.RSAPrivateKey;
@@ -18,6 +24,9 @@ import java.util.Date;
 
 @Service
 public class AuthServiceImpl implements AuthService {
+
+    @Autowired
+    private jwtUtility jwtUtil;
 
     @Autowired
     private UsersRepository usersRepository;
@@ -29,28 +38,16 @@ public class AuthServiceImpl implements AuthService {
 
         Users users = usersRepository.findByEmail(usersRequest.getUserEmail());
 
-        // Jika user tidak ditemukan
         if (users == null) {
-            return RestApiResponse.<UsersLoginResponse>builder()
-                    .code("401")
-                    .message("Email tidak ditemukan")
-                    .data(null)
-                    .error(Collections.singletonList("User not found"))
-                    .build();
+            throw new UnauthorizedException("Email tidak ditemukan");
         }
 
-        // Jika password salah
         if (!usersRequest.getUserPassword().equals(users.getUserPassword())) {
-            return RestApiResponse.<UsersLoginResponse>builder()
-                    .code("401")
-                    .message("Password salah")
-                    .data(null)
-                    .error(Collections.singletonList("Invalid password"))
-                    .build();
+            throw new UnauthorizedException("Password salah");
         }
 
-        // Jika login berhasil
         String token = generateToken(users.getUserEmail(), users.getUserRole(), users.getUserName());
+
         UsersLoginResponse usersLoginResponse = UsersLoginResponse.builder()
                 .userEmail(users.getUserEmail())
                 .userName(users.getUserName())
@@ -75,6 +72,58 @@ public class AuthServiceImpl implements AuthService {
                 .withClaim("userName", userName)
                 .withExpiresAt(new Date(System.currentTimeMillis() + 3600 * 1000)) // 1 jam
                 .sign(Algorithm.RSA256(null, privateKey));
+    }
+
+    public ResponseEntity<RestApiResponse<UsersLoginResponse>> getCurrentUser(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        System.out.println("Authorization Header: " + authHeader);
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("Missing or malformed Authorization header.");
+            return buildErrorResponse(RestApiError.ACCOUNT_NOT_FOUND);
+        }
+
+        String token = authHeader.substring(7);
+        System.out.println("Extracted Token: " + token);
+
+        if (!jwtUtil.validateToken(token)) {
+            System.out.println("Token failed validation.");
+            return buildErrorResponse(RestApiError.ACCOUNT_NOT_FOUND);
+        }
+
+        String username = jwtUtil.extractUsername(token);
+
+        System.out.println("Extracted Username: " + username);
+
+        //TODO askgfdasdkfm
+        UsersLoginResponse user = UsersLoginResponse.builder()
+                .userName(username)
+                .userEmail(username + "@example.com")
+                .userRole("USER")
+                .build();
+
+        RestApiResponse<UsersLoginResponse> response = RestApiResponse.<UsersLoginResponse>builder()
+                .code(String.valueOf(HttpStatus.OK.value()))
+                .message("SUCCESS")
+                .data(user)
+                .error(Collections.emptyList())
+                .dataAll(null)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    private ResponseEntity<RestApiResponse<UsersLoginResponse>> buildErrorResponse(RestApiError error) {
+        RestApiResponse<UsersLoginResponse> response = RestApiResponse.<UsersLoginResponse>builder()
+                .code(String.valueOf(error.getCode()))
+                .message(error.getMessage())
+                .data(null)
+                .error(Collections.singletonList(error.getMessage()))
+                .dataAll(null)
+                .build();
+
+        return ResponseEntity.status(error.getCode()).body(response);
     }
 
 }
