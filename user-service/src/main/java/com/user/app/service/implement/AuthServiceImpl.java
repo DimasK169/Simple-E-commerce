@@ -2,6 +2,8 @@ package com.user.app.service.implement;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.user.app.dto.request.UsersRequest;
 import com.user.app.dto.response.RestApiError;
 import com.user.app.dto.response.RestApiResponse;
@@ -74,6 +76,7 @@ public class AuthServiceImpl implements AuthService {
                 .sign(Algorithm.RSA256(null, privateKey));
     }
 
+    @Override
     public ResponseEntity<RestApiResponse<UsersLoginResponse>> getCurrentUser(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         System.out.println("Authorization Header: " + authHeader);
@@ -113,6 +116,41 @@ public class AuthServiceImpl implements AuthService {
         return ResponseEntity.ok(response);
     }
 
+    @Override
+    public RestApiResponse<UsersLoginResponse> refreshToken(String token){
+        String currentToken = token.replace("Bearer ", "");
+
+        try {
+            DecodedJWT decodedJWT = JWT.require(Algorithm.RSA256(KeyUtil.getPublicKey(), null))
+                    .withIssuer("your-auth-server")
+                    .build()
+                    .verify(currentToken);
+
+            String userEmail = decodedJWT.getSubject();
+            String userRole = decodedJWT.getClaim("userRole").toString();
+            String userName = decodedJWT.getClaim("userName").asString();
+            String newToken = generateToken(userEmail, userRole, userName);
+
+            UsersLoginResponse response = UsersLoginResponse.builder()
+                    .userToken(newToken)
+                    .build();
+
+            return RestApiResponse.<UsersLoginResponse>builder()
+                    .code("200")
+                    .message("Token refreshed successfully")
+                    .data(response)
+                    .error(null)
+                    .build();
+
+        } catch (JWTVerificationException e) {
+            if (e.getMessage().contains("expired")) {
+                throw new UnauthorizedException("Token has expired and cannot be refreshed. Please login again");
+            }
+            throw new UnauthorizedException("Invalid refresh token");
+        } catch (Exception e) {
+            throw new UnauthorizedException("An error occurred while refreshing the token.");
+        }
+    }
 
     private ResponseEntity<RestApiResponse<UsersLoginResponse>> buildErrorResponse(RestApiError error) {
         RestApiResponse<UsersLoginResponse> response = RestApiResponse.<UsersLoginResponse>builder()
