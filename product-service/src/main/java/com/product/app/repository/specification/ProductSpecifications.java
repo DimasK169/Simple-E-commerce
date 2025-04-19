@@ -1,6 +1,6 @@
 package com.product.app.repository.specification;
 
-import com.product.app.entity.Product;
+import com.product.app.entity.product.Product;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.*;
 

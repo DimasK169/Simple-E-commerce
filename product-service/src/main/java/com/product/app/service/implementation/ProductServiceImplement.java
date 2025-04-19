@@ -7,8 +7,8 @@ import com.product.app.dto.request.ProductUpdateRequest;
 import com.product.app.dto.response.RestApiResponse;
 import com.product.app.dto.result.ProductCreateResponse;
 import com.product.app.dto.result.ProductUpdateResponse;
-import com.product.app.entity.Product;
-import com.product.app.repository.ProductRepository;
+import com.product.app.entity.product.Product;
+import com.product.app.repository.product.ProductRepository;
 import com.product.app.service.interfacing.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +24,6 @@ import java.util.Date;
 
 @Service
 public class ProductServiceImplement implements ProductService {
-
 
     @Autowired
     private ProductRepository productRepository;

@@ -6,7 +6,7 @@ import com.product.app.dto.request.ProductUpdateRequest;
 import com.product.app.dto.response.RestApiResponse;
 import com.product.app.dto.result.ProductCreateResponse;
 import com.product.app.dto.result.ProductUpdateResponse;
-import com.product.app.entity.Product;
+import com.product.app.entity.product.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

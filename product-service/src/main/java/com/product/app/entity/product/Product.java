@@ -1,4 +1,4 @@
-package com.product.app.entity;
+package com.product.app.entity.product;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
