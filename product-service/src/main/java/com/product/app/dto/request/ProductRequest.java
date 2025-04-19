@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class ProductRequest {
 
     @JsonProperty("name")
@@ -31,6 +32,10 @@ public class ProductRequest {
     @JsonProperty("price")
     @NotEmpty(message = "Product price cannot be empty")
     private Integer productPrice;
+
+    @JsonProperty("price")
+    @NotEmpty(message = "Product price cannot be empty")
+    private String createdBy;
 
     @JsonProperty("image")
     private String productImage;

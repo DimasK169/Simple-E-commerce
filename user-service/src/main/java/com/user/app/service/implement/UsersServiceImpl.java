@@ -2,16 +2,21 @@ package com.user.app.service.implement;
 
 import com.user.app.dto.request.AuditTrailsRequest;
 import com.user.app.dto.request.UsersRequest;
+import com.user.app.dto.response.RestApiError;
 import com.user.app.dto.response.RestApiResponse;
+import com.user.app.dto.result.UsersLoginResponse;
 import com.user.app.dto.result.UsersSaveResponse;
-import com.user.app.dto.result.UsersUpdateResponse;
 import com.user.app.entity.Users;
 import com.user.app.repository.UsersRepository;
 import com.user.app.service.interfacing.UsersService;
+import com.user.app.utility.jwtUtility;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Date;
 
 @Service
@@ -96,4 +101,6 @@ public class UsersServiceImpl implements UsersService {
         Users users = usersRepository.findByUserEmail(usersEmail);
         return users;
     }
+
+
 }

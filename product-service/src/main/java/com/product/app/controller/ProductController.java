@@ -29,26 +29,56 @@ public class ProductController {
 
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RestApiResponse<ProductCreateResponse> createProduct(
-            @Valid @RequestParam("product") String productJson,
+            @Valid @RequestParam("name") String productName,
+            @Valid @RequestParam("code") String productCode,
+            @Valid @RequestParam("description") String productDescription,
+            @Valid @RequestParam("category") String productCategory,
+            @Valid @RequestParam("stock") Integer productStock,
+            @Valid @RequestParam("price") Integer productPrice,
+            @Valid @RequestParam("isAvailable") Boolean productAvailable,
+            @Valid @RequestParam("createdBy") String createdBy,
             @RequestParam("image") MultipartFile imageFile
     ) throws IOException {
 
-        ObjectMapper mapper = new ObjectMapper();
-        ProductRequest productRequest = mapper.readValue(productJson, ProductRequest.class);
-
+        ProductRequest productRequest = ProductRequest.builder()
+                .productName(productName)
+                .productCode(productCode)
+                .productDescription(productDescription)
+                .productCategory(productCategory)
+                .productStock(productStock)
+                .productPrice(productPrice)
+                .productIsAvailable(productAvailable)
+                .createdBy(createdBy)
+                .build();
         return productService.create(productRequest, imageFile);
     }
 
     @PutMapping(value = "/{productCode}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RestApiResponse<ProductUpdateResponse> updateProduct(
             @PathVariable String productCode,
-            @Valid @RequestParam("product") String productJson,
+            @Valid @RequestParam("name") String productName,
+            @Valid @RequestParam("description") String productDescription,
+            @Valid @RequestParam("category") String productCategory,
+            @Valid @RequestParam("stock") Integer productStock,
+            @Valid @RequestParam("price") Integer productPrice,
+            @Valid @RequestParam("isAvailable") Boolean productAvailable,
             @RequestParam(value = "image", required = false) MultipartFile imageFile
     ) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        ProductUpdateRequest request = mapper.readValue(productJson, ProductUpdateRequest.class);
+        ProductUpdateRequest productRequest = ProductUpdateRequest.builder()
+                .productName(productName)
+                .productDescription(productDescription)
+                .productCategory(productCategory)
+                .productStock(productStock)
+                .productPrice(productPrice)
+                .productIsAvailable(productAvailable)
+                .build();
 
-        return productService.update(request, productCode, imageFile);
+        return productService.update(productRequest, productCode, imageFile);
+    }
+
+    @GetMapping("/{productCode}")
+    public RestApiResponse<ProductUpdateResponse> getProductbyCode(@PathVariable String productCode){
+        return productService.getbyCode(productCode);
     }
 
     @DeleteMapping("/{productCode}")

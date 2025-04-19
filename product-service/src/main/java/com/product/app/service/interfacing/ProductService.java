@@ -21,5 +21,6 @@ public interface ProductService {
     RestApiResponse<ProductUpdateResponse> delete(String productCode) throws JsonProcessingException;
     RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(int page, int size);
     RestApiResponse<Page<ProductUpdateResponse>> searchProducts(String keyword, Pageable pageable);
+    RestApiResponse<ProductUpdateResponse> getbyCode(String productCode);
     Product getProductCode(String productCode);
 }

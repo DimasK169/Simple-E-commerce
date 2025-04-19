@@ -25,6 +25,7 @@ import java.util.Date;
 @Service
 public class ProductServiceImplement implements ProductService {
 
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -44,6 +45,7 @@ public class ProductServiceImplement implements ProductService {
             throw new IllegalArgumentException("Product code must be unique.");
         }
 
+
         String savedFileName = fileStorageService.storeFile(imageFile);
 
         Product product = Product.builder()
@@ -57,7 +59,7 @@ public class ProductServiceImplement implements ProductService {
                 .productIsAvailable(request.getProductIsAvailable())
                 .productIsDelete(false)
                 .createdDate(new Date())
-                .createdBy("admin 1")
+                .createdBy(request.getCreatedBy())
                 .build();
 
         Product savedProduct = productRepository.save(product);
@@ -227,6 +229,32 @@ public class ProductServiceImplement implements ProductService {
                 .code("200")
                 .message("Products retrieved successfully")
                 .data(responsePage)
+                .build();
+    }
+
+    @Override
+    public RestApiResponse<ProductUpdateResponse> getbyCode(String productCode) {
+        Product product = getProductCode(productCode);
+        if(product == null){
+            throw new IllegalArgumentException("Invalid product Name");
+        }
+
+        ProductUpdateResponse productResponse = ProductUpdateResponse.builder()
+                .productName(product.getProductName())
+                .productCode(product.getProductCode())
+                .productDescription(product.getProductDescription())
+                .productCategory(product.getProductCategory())
+                .productImage(baseUrl + "/images/" + product.getProductImage())
+                .productPrice(product.getProductPrice())
+                .productIsAvailable(product.getProductIsAvailable())
+                .productIsDelete(product.getProductIsDelete())
+                .productStock(product.getProductStock())
+                .build();
+
+        return RestApiResponse.<ProductUpdateResponse>builder()
+                .code("200")
+                .message("Products retrieved successfully")
+                .data(productResponse)
                 .build();
     }
 
