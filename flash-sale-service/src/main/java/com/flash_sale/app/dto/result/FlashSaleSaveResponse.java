@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Date;
 
 @Data
@@ -21,10 +23,10 @@ public class FlashSaleSaveResponse {
     private String fsProduct;
 
     @JsonProperty("FlashSale_StartDate")
-    private Date fsStartDate;
+    private LocalDateTime fsStartDate;
 
     @JsonProperty("FlashSale_EndDate")
-    private Date fsEndDate;
+    private LocalDateTime   fsEndDate;
 
     @JsonProperty("FlashSale_Discount")
     private Double trxDiscount;

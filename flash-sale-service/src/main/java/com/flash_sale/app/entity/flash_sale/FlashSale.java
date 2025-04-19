@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -21,8 +22,8 @@ public class FlashSale {
     private String fsName;
     private String fsCode;
     private String fsProduct;
-    private Date fsStartDate;
-    private Date fsEndDate;
+    private LocalDateTime  fsStartDate;
+    private LocalDateTime fsEndDate;
     private String fsCreatedBy;
     private Date fsCreatedDate;
     private Date fsUpdateDate;

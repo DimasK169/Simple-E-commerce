@@ -33,7 +33,6 @@ public class ProductController {
             @Valid @RequestParam("stock") Integer productStock,
             @Valid @RequestParam("price") Integer productPrice,
             @Valid @RequestParam("isAvailable") Boolean productAvailable,
-            @Valid @RequestParam("createdBy") String createdBy,
             @RequestParam("image") MultipartFile imageFile
     ) throws IOException {
 
@@ -45,7 +44,6 @@ public class ProductController {
                 .productStock(productStock)
                 .productPrice(productPrice)
                 .productIsAvailable(productAvailable)
-                .createdBy(createdBy)
                 .build();
         return productService.create(productRequest, imageFile);
     }
@@ -90,7 +88,7 @@ public class ProductController {
 
     @GetMapping("/search")
     public RestApiResponse<Page<ProductUpdateResponse>> searchProducts(
-            @RequestParam String keyword,
+            @Valid @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return productService.searchProducts(keyword, PageRequest.of(page, size));

@@ -24,10 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class FlashSaleServiceImpl implements FlashSaleService {
@@ -48,6 +45,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     @Autowired
     private Pusher pusher;
+
 
     @Transactional
     @Override
@@ -333,6 +331,25 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     public List<FlashSale> getFsCode(String fsCode) {
         return flashSaleRepository.findByFsCode(fsCode);
+    }
+
+
+    public RestApiResponse<Map<String, String>> getActiveFlashSaleCodeResponse() {
+        Optional<String> fsCode = flashSaleRepository.findActiveFlashSaleCode();
+
+        if (fsCode.isPresent()) {
+            return RestApiResponse.<Map<String, String>>builder()
+                    .code("200 OK")
+                    .message("Flash sale aktif ditemukan")
+                    .data(Map.of("FlashSale_Code", fsCode.get()))
+                    .build();
+        } else {
+            return RestApiResponse.<Map<String, String>>builder()
+                    .code("404 NOT_FOUND")
+                    .message("Tidak ada flash sale yang aktif saat ini")
+                    .error(List.of("Flash sale tidak ditemukan"))
+                    .build();
+        }
     }
 
 }
