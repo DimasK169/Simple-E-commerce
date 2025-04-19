@@ -158,10 +158,6 @@ public class CartServiceImplementation implements CartService {
                     Optional<TrxFlashSale> trxFlashSale = trxFlashSaleRepository.findByFsCodeAndProductCode(cart.get().getFsCode(), cart.get().getProductCode());
                     if (trxFlashSale.isEmpty()) errors.add(TRXFLASHSALE_NOT_FOUND);
 
-                    if (!errors.isEmpty()) {
-                        throw new CustomIllegalArgumentException("Validation Error", errors);
-                    }
-
                     FlashSale fs = flashSale.get();
                     TrxFlashSale trx = trxFlashSale.get();
 
@@ -171,6 +167,10 @@ public class CartServiceImplementation implements CartService {
                         } else {
                             updateCart.setCartTotalPrice(trx.getTrxPrice() * cartRequest.getCartQuantity());
                         }
+                    }
+
+                    if (!errors.isEmpty()) {
+                        throw new CustomIllegalArgumentException("Validation Error", errors);
                     }
                 }
                 updateCart.setCartTotalPrice(product.get().getProductPrice() * cartRequest.getCartQuantity());

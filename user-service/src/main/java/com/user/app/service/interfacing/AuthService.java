@@ -12,4 +12,5 @@ public interface AuthService {
 
     RestApiResponse<UsersLoginResponse> authentication(UsersRequest usersRequest) throws Exception;
     ResponseEntity<RestApiResponse<UsersLoginResponse>> getCurrentUser(HttpServletRequest request);
+    RestApiResponse<UsersLoginResponse> refreshToken(String token);
 }
