@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
                 .withIssuer("your-auth-server")
                 .withClaim("userRole", userRole)
                 .withClaim("userName", userName)
-                .withExpiresAt(new Date(System.currentTimeMillis() + 3600 * 1000)) // 1 jam
+                .withExpiresAt(new Date(System.currentTimeMillis() + 18000 * 1000)) // 1 jam
                 .sign(Algorithm.RSA256(null, privateKey));
     }
 
@@ -102,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
         UsersLoginResponse user = UsersLoginResponse.builder()
                 .userName(username)
                 .userEmail(username + "@example.com")
-                .userRole("USER")
+                .userRole("Customer")
                 .build();
 
         RestApiResponse<UsersLoginResponse> response = RestApiResponse.<UsersLoginResponse>builder()
