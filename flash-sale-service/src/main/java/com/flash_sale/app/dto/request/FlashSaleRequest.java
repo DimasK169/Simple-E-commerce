@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -27,11 +29,11 @@ public class FlashSaleRequest {
 
     @JsonProperty("FlashSale_StartDate")
     @NotNull(message = "Flash sale start date cannot be empty")
-    private Date fsStartDate;
+    private LocalDateTime fsStartDate;
 
     @JsonProperty("FlashSale_EndDate")
     @NotNull(message = "Flash sale end date cannot be empty")
-    private Date fsEndDate;
+    private LocalDateTime   fsEndDate;
 
     @JsonProperty("FlashSale_CreatedBy")
     private String fsCreatedBy;

@@ -10,6 +10,7 @@ import com.flash_sale.app.entity.flash_sale.FlashSale;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Map;
 
 public interface FlashSaleService {
 
@@ -22,5 +23,7 @@ public interface FlashSaleService {
     RestApiResponse<List<FlashSaleUpdateResponse>> getByFlashSaleCode(String fsCode) throws JsonProcessingException;
 
     RestApiResponse<Page<FlashSaleUpdateResponse>> getAllFlashSale(int page, int size);
+
+    RestApiResponse<Map<String, String>> getActiveFlashSaleCodeResponse();
 }
 

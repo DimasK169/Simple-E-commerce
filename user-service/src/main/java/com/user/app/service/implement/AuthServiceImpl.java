@@ -102,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
         UsersLoginResponse user = UsersLoginResponse.builder()
                 .userName(username)
                 .userEmail(username + "@example.com")
-                .userRole("Customer")
+                .userRole("USER")
                 .build();
 
         RestApiResponse<UsersLoginResponse> response = RestApiResponse.<UsersLoginResponse>builder()

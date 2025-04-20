@@ -19,4 +19,9 @@ public interface FlashSaleRepository extends JpaRepository<FlashSale, Long> {
     Optional<FlashSale> findByFsCodeAndFsProduct(String fsCode, String fsProduct);
     Page<FlashSale> findAllByFsIsDeleteFalse(Pageable pageable);
 
+    @Query("SELECT DISTINCT t.fsCode FROM FlashSale t " +
+            "WHERE t.fsStartDate <= CURRENT_TIMESTAMP " +
+            "AND t.fsEndDate >= CURRENT_TIMESTAMP " +
+            "AND t.fsIsDelete = false")
+    Optional<String> findActiveFlashSaleCode();
 }

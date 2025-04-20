@@ -11,9 +11,12 @@ import com.flash_sale.app.service.Interface.FlashSaleService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/flash-sale")
@@ -45,5 +48,15 @@ public class FlashSaleController {
     @GetMapping("/get")
     public RestApiResponse<Page<FlashSaleUpdateResponse>> getAllFlashSale(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return flashSaleService.getAllFlashSale(page, size);
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<RestApiResponse<Map<String, String>>> getActiveFlashSaleCode() {
+        RestApiResponse<Map<String, String>> response = flashSaleService.getActiveFlashSaleCodeResponse();
+        if (response.getData() != null) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 }
