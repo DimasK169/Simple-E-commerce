@@ -21,6 +21,9 @@ public class FlashSaleUpdateResponse {
     @JsonProperty("FlashSale_Product")
     private String fsProduct;
 
+    @JsonProperty("Product_Code")
+    private String productCode;
+
     @JsonProperty("FlashSale_Discount")
     private Double trxDiscount;
 

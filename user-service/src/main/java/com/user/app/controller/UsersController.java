@@ -10,6 +10,7 @@ import com.user.app.service.implement.UsersServiceImpl;
 import com.user.app.service.interfacing.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,5 +50,10 @@ public class UsersController {
     @GetMapping("/getMe")
     public ResponseEntity<RestApiResponse<UsersLoginResponse>> getCurrentUser() {
         return ResponseEntity.ok(usersService.getCurrentUser());
+    }
+
+    @PostMapping("/refresh")
+    public RestApiResponse<UsersLoginResponse> refreshToken(HttpServletRequest request){
+        return authService.refreshToken((String) request.getHeader("Authorization"));
     }
 }

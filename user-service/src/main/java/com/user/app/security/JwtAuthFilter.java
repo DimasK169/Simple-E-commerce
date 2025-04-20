@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
+import static com.user.app.service.implement.AuthServiceImpl.generateToken;
+
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
@@ -26,7 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         System.out.println("Request Path: " + request.getServletPath());
 
-        List<String> publicPaths = List.of("/users/login", "/users/save");
+        List<String> publicPaths = List.of("/users/login", "/users/save", "/users/me", "/users/refresh");
 
         if (publicPaths.contains(path)) {
             filterChain.doFilter(request, response);
@@ -46,9 +48,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .build()
                         .verify(token);
 
-                String username = jwt.getSubject();
+                String userEmail = jwt.getSubject();
+                String userRole = jwt.getClaim("userRole").toString();
+                String userName = jwt.getClaim("userName").asString();
+
+                long currentTimeMillis = System.currentTimeMillis();
+                long expiryTime = jwt.getExpiresAt().getTime();
+
+                if (expiryTime - currentTimeMillis <= 5000) {  // 5000 ms = 5 detik
+                    String refreshedToken = generateToken(userEmail, userRole, userName);
+                    response.setHeader("Refresh-Token", refreshedToken); // Mengirimkan refresh token
+                }
+
                 UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(username, null, List.of());
+                        new UsernamePasswordAuthenticationToken(userEmail, null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {

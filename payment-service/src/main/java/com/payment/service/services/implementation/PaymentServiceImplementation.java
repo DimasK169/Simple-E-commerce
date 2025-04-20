@@ -62,7 +62,7 @@ public class PaymentServiceImplementation implements PaymentService {
         List<String> errors = new ArrayList<>();
         try{
 
-            if (!userRole.equals("User")) errors.add(PAYMENT_ROLE_WRONG);
+            if (!userRole.equals("Customer")) errors.add(PAYMENT_ROLE_WRONG);
 
             List<CartEntity> cartEntity = cartRepository.findByUserEmail(userEmail, "N/A", false, false);
             if(cartEntity.isEmpty()){
@@ -167,7 +167,7 @@ public class PaymentServiceImplementation implements PaymentService {
         List<String> errors = new ArrayList<>();
 
         try {
-            if (!userRole.equals("User")) errors.add(PAYMENT_ROLE_WRONG);
+            if (!userRole.equals("Customer")) errors.add(PAYMENT_ROLE_WRONG);
 
             List<PaymentEntity> paymentEntities = paymentRepository.findPaymentByEmailAndStatus(userEmail, status);
             if (paymentEntities.isEmpty()) errors.add(PAYMENT_NOT_FOUND);
@@ -223,7 +223,7 @@ public class PaymentServiceImplementation implements PaymentService {
         List<String> errors = new ArrayList<>();
 
         try {
-            if (!userRole.equals("User")) errors.add(PAYMENT_ROLE_WRONG);
+            if (!userRole.equals("Customer")) errors.add(PAYMENT_ROLE_WRONG);
 
             List<PaymentEntity> allPayments = paymentRepository.findPaymentByEmail(userEmail);
             if (allPayments.isEmpty()) errors.add(PAYMENT_NOT_FOUND);
@@ -281,7 +281,6 @@ public class PaymentServiceImplementation implements PaymentService {
             throw e;
         }
     }
-
 
     private String encodeServerKey() {
         return java.util.Base64.getEncoder().encodeToString((midtransKey + ":").getBytes());

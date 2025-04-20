@@ -166,6 +166,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .fsName(updatedFlashSale.getFsName())
                         .fsCode(updatedFlashSale.getFsCode())
                         .fsProduct(updatedFlashSale.getFsProduct())
+                        .productCode(saveProduct.getProductCode())
                         .trxDiscount(trxFlashSale.getTrxDiscount())
                         .trxPrice(trxFlashSale.getTrxPrice())
                         .fsStartDate(updatedFlashSale.getFsStartDate())
@@ -246,6 +247,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .fsName(flashSale.getFsName())
                         .fsCode(flashSale.getFsCode())
                         .fsProduct(flashSale.getFsProduct())
+                        .productCode(trx.getProductCode())
                         .fsStartDate(flashSale.getFsStartDate())
                         .fsEndDate(flashSale.getFsEndDate())
                         .fsCreatedBy(flashSale.getFsCreatedBy())
@@ -305,6 +307,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .trxDiscount(trx.getTrxDiscount())
                         .trxPrice(trx.getTrxPrice())
                         .productPrice(product.getProductPrice())
+                        .productCode(product.getProductCode())
                         .productImage(baseUrl + "/images/" + product.getProductImage())
                         .status("Fetched")
                         .build();
@@ -326,8 +329,6 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 .data(responsePage)
                 .build();
     }
-
-
 
     public List<FlashSale> getFsCode(String fsCode) {
         return flashSaleRepository.findByFsCode(fsCode);

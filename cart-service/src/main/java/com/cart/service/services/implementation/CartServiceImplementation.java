@@ -59,7 +59,7 @@ public class CartServiceImplementation implements CartService {
         try {
             List<String> errors = new ArrayList<>();
 
-            if (!userRole.equals("User")){
+            if (!userRole.equals("Customer")){
                 errors.add(CART_MESSAGE_WRONG_ROLE);
             }
 
@@ -113,6 +113,10 @@ public class CartServiceImplementation implements CartService {
             CartEntity savedCart = cartRepository.save(cartEntity);
             CartSaveResult result = buildCartSaveResult(savedCart);
 
+            Integer updateStock = existingProduct.getProductStock() - cartRequest.getCartQuantity();
+            existingProduct.setProductStock(updateStock);
+            productRepository.save(existingProduct);
+
             insertAuditTrail(cartRequest, result, AUDIT_CREATE_DESC_ACTION_SUCCESS, AUDIT_CREATE_ACTION);
 
             return RestApiResponse.<CartSaveResult>builder()
@@ -135,12 +139,13 @@ public class CartServiceImplementation implements CartService {
             List<String> errors = new ArrayList<>();
             List<CartSaveResult> responseList = new ArrayList<>();
 
-            if (!userRole.equals("User")){
+            if (!userRole.equals("Customer")){
                 errors.add(CART_MESSAGE_WRONG_ROLE);
             }
 
             Optional<Product> product = productRepository.findProductByCode(cartRequest.getProductCode());
             if(product.isEmpty()) errors.add(PRODUCT_NOT_FOUND);
+            Product existingProduct = product.get();
 
             Optional<CartEntity> cart = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber(userEmail, cartRequest.getProductCode(), "N/A", false, false);
             if (cart.isEmpty()) {
@@ -158,10 +163,6 @@ public class CartServiceImplementation implements CartService {
                     Optional<TrxFlashSale> trxFlashSale = trxFlashSaleRepository.findByFsCodeAndProductCode(cart.get().getFsCode(), cart.get().getProductCode());
                     if (trxFlashSale.isEmpty()) errors.add(TRXFLASHSALE_NOT_FOUND);
 
-                    if (!errors.isEmpty()) {
-                        throw new CustomIllegalArgumentException("Validation Error", errors);
-                    }
-
                     FlashSale fs = flashSale.get();
                     TrxFlashSale trx = trxFlashSale.get();
 
@@ -172,10 +173,17 @@ public class CartServiceImplementation implements CartService {
                             updateCart.setCartTotalPrice(trx.getTrxPrice() * cartRequest.getCartQuantity());
                         }
                     }
+
+                    if (!errors.isEmpty()) {
+                        throw new CustomIllegalArgumentException("Validation Error", errors);
+                    }
                 }
-                updateCart.setCartTotalPrice(product.get().getProductPrice() * cartRequest.getCartQuantity());
+                updateCart.setCartTotalPrice(existingProduct.getProductPrice() * cartRequest.getCartQuantity());
                 updateCart.setCartUpdatedDate(new Date());
                 CartEntity updatedCart = cartRepository.save(updateCart);
+                Integer updateStock = existingProduct.getProductStock() - 1;
+                existingProduct.setProductStock(updateStock);
+                productRepository.save(existingProduct);
 
                 CartSaveResult result = buildCartSaveResult(updatedCart);
                 responseList.add(result);
@@ -204,7 +212,7 @@ public class CartServiceImplementation implements CartService {
     public RestApiResponse deleteCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException {
 
         try {
-            if (!"User".equals(userRole)){
+            if (!"Customer".equals(userRole)){
                 throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_MESSAGE_WRONG_ROLE));
             }
 
@@ -212,6 +220,15 @@ public class CartServiceImplementation implements CartService {
             if (cart.isEmpty()){
                 throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
             }
+            CartEntity existingCart = cart.get();
+
+            Optional<Product> product = productRepository.findProductByCode(existingCart.getProductCode());
+            if (product.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(PRODUCT_NOT_FOUND));
+            Product existingProduct = product.get();
+
+            Integer updateStock = existingProduct.getProductStock() + existingCart.getCartQuantity();
+            existingProduct.setProductStock(updateStock);
+            productRepository.save(existingProduct);
 
             cartRepository.delete(cart.get());
 
@@ -234,7 +251,7 @@ public class CartServiceImplementation implements CartService {
     public RestApiResponse<List<CartGetResult>> getCartByUserEmailAndProductCode(String userRole, String userEmail)throws JsonProcessingException{
         List<String> errors = new ArrayList<>();
         try{
-            if (!"User".equals(userRole))errors.add(CART_MESSAGE_WRONG_ROLE);
+            if (!"Customer".equals(userRole))errors.add(CART_MESSAGE_WRONG_ROLE);
 
             List<CartGetResult> result = new ArrayList<>();
 
