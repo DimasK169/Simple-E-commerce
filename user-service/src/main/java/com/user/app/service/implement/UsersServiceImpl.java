@@ -14,10 +14,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class UsersServiceImpl implements UsersService {
@@ -96,6 +98,36 @@ public class UsersServiceImpl implements UsersService {
 
         return response;
     }
+
+    public RestApiResponse<UsersLoginResponse> getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users user = usersRepository.findByEmail(email);
+
+        if (user == null) {
+            throw new IllegalArgumentException("Invalid User Email");
+        }
+
+        UsersLoginResponse userResponse = UsersLoginResponse.builder()
+                .userEmail(user.getUserEmail())
+                .userName(user.getUserName())
+                .userRole(user.getUserRole())
+                .build();
+
+        auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
+                .AtAction("Get")
+                .AtDescription("Get Current User")
+                .AtDate(new Date())
+                .AtRequest(email)
+                .AtResponse(String.valueOf(userResponse))
+                .build());
+
+        return RestApiResponse.<UsersLoginResponse>builder()
+                .code(HttpStatus.OK.toString())
+                .message("Berhasil Get Current User")
+                .data(userResponse)
+                .build();
+    }
+
 
     public Users getUsersEmail(String usersEmail){
         Users users = usersRepository.findByUserEmail(usersEmail);

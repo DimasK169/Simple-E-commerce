@@ -95,10 +95,9 @@ public class AuthServiceImpl implements AuthService {
 
         System.out.println("Extracted Username: " + username);
 
-        //TODO askgfdasdkfm
         UsersLoginResponse user = UsersLoginResponse.builder()
                 .userName(username)
-                .userEmail(username + "@example.com")
+                .userEmail(username)
                 .userRole("USER")
                 .build();
 
