@@ -309,6 +309,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .trxDiscount(trx.getTrxDiscount())
                         .trxPrice(trx.getTrxPrice())
                         .productPrice(product.getProductPrice())
+                        .productCode(product.getProductCode())
                         .productImage(baseUrl + "/images/" + product.getProductImage())
                         .status("Fetched")
                         .build();
@@ -330,8 +331,6 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 .data(responsePage)
                 .build();
     }
-
-
 
     public List<FlashSale> getFsCode(String fsCode) {
         return flashSaleRepository.findByFsCode(fsCode);
