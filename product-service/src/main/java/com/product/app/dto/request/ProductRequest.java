@@ -33,7 +33,7 @@ public class ProductRequest {
     @NotEmpty(message = "Product price cannot be empty")
     private Integer productPrice;
 
-    @JsonProperty("price")
+    @JsonProperty("createdBy")
     @NotEmpty(message = "Product price cannot be empty")
     private String createdBy;
 

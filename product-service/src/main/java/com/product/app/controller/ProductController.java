@@ -33,6 +33,7 @@ public class ProductController {
             @Valid @RequestParam("stock") Integer productStock,
             @Valid @RequestParam("price") Integer productPrice,
             @Valid @RequestParam("isAvailable") Boolean productAvailable,
+            @Valid @RequestParam("createdBy") String createdBy,
             @RequestParam("image") MultipartFile imageFile
     ) throws IOException {
 
@@ -44,6 +45,7 @@ public class ProductController {
                 .productStock(productStock)
                 .productPrice(productPrice)
                 .productIsAvailable(productAvailable)
+                .createdBy(createdBy)
                 .build();
         return productService.create(productRequest, imageFile);
     }
