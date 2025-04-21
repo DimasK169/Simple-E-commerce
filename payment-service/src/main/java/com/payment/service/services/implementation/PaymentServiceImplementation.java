@@ -162,53 +162,7 @@ public class PaymentServiceImplementation implements PaymentService {
     }
 
     @Override
-    public RestApiResponse<List<PaymentSaveResult>> getUnfinishedPayment(String userRole, String userEmail, String status) {
-
-        try {
-            if (!userRole.equals("Customer")) throw new UnauthorizedException(PAYMENT_ROLE_WRONG);
-
-            List<PaymentEntity> paymentEntities = paymentRepository.findPaymentByEmailAndStatus(userEmail, status);
-            if (paymentEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(PAYMENT_NOT_FOUND));
-
-            List<PaymentSaveResult> results = new ArrayList<>();
-
-            for (PaymentEntity getPayment : paymentEntities) {
-                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(
-                        userEmail,
-                        getPayment.getPaymentNumber(),false, false
-                );
-                if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
-
-                Integer totalPrice = 0;
-                List<PaymentProductSaved> savedProduct = new ArrayList<>();
-
-                for (CartEntity getCart : cartEntities) {
-                    PaymentProductSaved product = new PaymentProductSaved();
-                    product.setProductQuantity(getCart.getCartQuantity().toString());
-                    product.setProductName(getCart.getProductName());
-                    product.setCartTotalPricePerItem(getCart.getCartTotalPrice().toString());
-                    totalPrice += getCart.getCartTotalPrice();
-                    savedProduct.add(product);
-                }
-
-                PaymentSaveResult result = getPayment(getPayment, totalPrice);
-                result.setProduct(savedProduct);
-                results.add(result);
-            }
-
-            return RestApiResponse.<List<PaymentSaveResult>>builder()
-                    .code(AUDIT_GET_ACTION)
-                    .message(AUDIT_GET_DESC_ACTION_SUCCESS)
-                    .data(results)
-                    .build();
-
-        } catch (CustomIllegalArgumentException e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public RestApiResponse<List<PaymentSaveResult>> getFinishedPayment(String userRole, String userEmail) {
+    public RestApiResponse<List<PaymentSaveResult>> getPayment(String userRole, String userEmail) {
 
         try {
             if (!userRole.equals("Customer")) throw new UnauthorizedException(PAYMENT_ROLE_WRONG);
@@ -218,7 +172,7 @@ public class PaymentServiceImplementation implements PaymentService {
 
             List<PaymentEntity> paymentEntities = allPayments.stream()
                     .filter(p -> p.getPaymentStatus().equalsIgnoreCase("settlement") ||
-                            p.getPaymentStatus().equalsIgnoreCase("expire"))
+                            p.getPaymentStatus().equalsIgnoreCase("expire") || p.getPaymentStatus().equalsIgnoreCase("pending"))
                     .collect(Collectors.toList());
 
             List<PaymentSaveResult> results = new ArrayList<>();
@@ -230,8 +184,10 @@ public class PaymentServiceImplementation implements PaymentService {
                 List<CartEntity> cartEntities;
                 if (getPayment.getPaymentStatus().equalsIgnoreCase("settlement")) {
                     cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), true, false);
-                } else {
+                } else if (getPayment.getPaymentStatus().equalsIgnoreCase("expire")){
                     cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), false, true);
+                } else {
+                    cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), false, false);
                 }
 
                 if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
