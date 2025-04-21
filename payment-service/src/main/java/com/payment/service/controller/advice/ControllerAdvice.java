@@ -3,6 +3,7 @@ package com.payment.service.controller.advice;
 import com.payment.service.dto.response.RestApiError;
 import com.payment.service.dto.response.RestApiResponse;
 import com.payment.service.exception.CustomIllegalArgumentException;
+import com.payment.service.exception.UnauthorizedException;
 import com.payment.service.utility.CoreThrowHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,6 +79,15 @@ public class ControllerAdvice {
         response.put("code", HttpStatus.BAD_REQUEST.value());
         response.put("message", ex.getMessage());
         response.put("errors", ex.getMessage());
+        response.put("timestamp", LocalDateTime.now());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException ex){
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", HttpStatus.BAD_REQUEST.value());
+        response.put("message", ex.getMessage());
         response.put("timestamp", LocalDateTime.now());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

@@ -36,8 +36,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RestApiResponse<UsersLoginResponse> authentication(UsersRequest usersRequest) throws Exception {
 
-        System.out.println("Masuk method login");
-
         Users users = usersRepository.findByEmail(usersRequest.getUserEmail());
 
         if (users == null) {

@@ -36,6 +36,7 @@ public class GeneralConstant {
 
     //Cart Response
     public static final String CART_MESSAGE_WRONG_ROLE = "Role Anda Bukan User";
+    public static final String CART_MESSAGE_ALREADY_ADDED = "Barang Telah Ada Di Dalam Cart";
 
     //Audit Create
     public static final String AUDIT_CREATE_ACTION = "Create";
