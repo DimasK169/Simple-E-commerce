@@ -76,6 +76,7 @@ public class PaymentServiceImplementation implements PaymentService {
                 cartData.setPaymentNumber(createNewPayment.getPaymentNumber());
                 cartRepository.save(cartData);
             }
+            createNewPayment.setPaymentPrice(totalPrice);
 
             ResponseEntity<Map> response = postMidtrans(paymentRequest.getPaymentType(), createNewPayment.getPaymentNumber(), totalPrice);
             String midtransUrl = String.format(midtransStatus, createNewPayment.getPaymentNumber());
@@ -184,10 +185,13 @@ public class PaymentServiceImplementation implements PaymentService {
                 List<CartEntity> cartEntities;
                 if (getPayment.getPaymentStatus().equalsIgnoreCase("settlement")) {
                     cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), true, false);
+                    if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
                 } else if (getPayment.getPaymentStatus().equalsIgnoreCase("expire")){
                     cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), false, true);
+                    if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
                 } else {
                     cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), false, false);
+                    if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
                 }
 
                 if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
@@ -269,6 +273,7 @@ public class PaymentServiceImplementation implements PaymentService {
                 .paymentStatus(createPayment.getPaymentStatus())
                 .paymentType(createPayment.getPaymentType())
                 .cartTotalPrice(createPayment.getPaymentPrice())
+                .paymentPrice(createPayment.getPaymentPrice())
                 .paymentStartDate(createPayment.getPaymentStartDate())
                 .paymentEndDate(createPayment.getPaymentEndDate())
                 .paymentThirdParty(response)
