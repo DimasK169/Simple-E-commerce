@@ -14,8 +14,7 @@ import java.util.Map;
 public interface PaymentService {
 
     RestApiResponse<PaymentSaveResult> createPayment(String userRole, String userEmail, PaymentRequest paymentRequest) throws JsonProcessingException, ParseException;
-    RestApiResponse<List<PaymentSaveResult>> getUnfinishedPayment(String userRole, String userEmail, String status);
-    RestApiResponse<List<PaymentSaveResult>> getFinishedPayment(String userRole, String userEmail);
+    RestApiResponse<List<PaymentSaveResult>> getPayment(String userRole, String userEmail);
     String updatePaymentStatus(Map<String, Object> payload);
 
 }

@@ -36,12 +36,7 @@ public class PaymentController {
     }
 
     @GetMapping("")
-    public RestApiResponse<List<PaymentSaveResult>> getUnpaidPayment(HttpServletRequest request, @RequestParam String status){
-        return paymentServiceImplementation.getUnfinishedPayment((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"), status);
-    }
-
-    @GetMapping("/finished")
-    public RestApiResponse<List<PaymentSaveResult>> getFinishedPayment(HttpServletRequest request){
-        return paymentServiceImplementation.getFinishedPayment((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"));
+    public RestApiResponse<List<PaymentSaveResult>> getPayment(HttpServletRequest request){
+        return paymentServiceImplementation.getPayment((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"));
     }
 }

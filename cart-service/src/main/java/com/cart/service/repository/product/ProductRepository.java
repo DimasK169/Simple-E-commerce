@@ -15,7 +15,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("Select t From Product t Where t.productCode=:productCode")
     Optional<Product> findProductByCode(String productCode);
 
-    @Query("Select t From Product t Where t.productCode=:productCode")
-    List<Product> findManyProductByCode(String productCode);
-
 }

@@ -11,6 +11,7 @@ import com.payment.service.entity.cart.CartEntity;
 import com.payment.service.entity.payment.PaymentEntity;
 import com.payment.service.entity.product.Product;
 import com.payment.service.exception.CustomIllegalArgumentException;
+import com.payment.service.exception.UnauthorizedException;
 import com.payment.service.repository.cart.CartRepository;
 import com.payment.service.repository.payment.PaymentRepository;
 import com.payment.service.repository.product.ProductRepository;
@@ -59,15 +60,12 @@ public class PaymentServiceImplementation implements PaymentService {
     @Override
     public RestApiResponse<PaymentSaveResult> createPayment(String userRole, String userEmail, PaymentRequest paymentRequest) throws JsonProcessingException, ParseException {
 
-        List<String> errors = new ArrayList<>();
         try{
 
-            if (!userRole.equals("Customer")) errors.add(PAYMENT_ROLE_WRONG);
+            if (!userRole.equals("Customer")) throw new UnauthorizedException(PAYMENT_ROLE_WRONG);
 
             List<CartEntity> cartEntity = cartRepository.findByUserEmail(userEmail, "N/A", false, false);
-            if(cartEntity.isEmpty()){
-               throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
-            }
+            if(cartEntity.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
 
             Integer totalPrice = 0;
 
@@ -78,9 +76,9 @@ public class PaymentServiceImplementation implements PaymentService {
                 cartData.setPaymentNumber(createNewPayment.getPaymentNumber());
                 cartRepository.save(cartData);
             }
+            createNewPayment.setPaymentPrice(totalPrice);
 
             ResponseEntity<Map> response = postMidtrans(paymentRequest.getPaymentType(), createNewPayment.getPaymentNumber(), totalPrice);
-            System.out.println("response"+response);
             String midtransUrl = String.format(midtransStatus, createNewPayment.getPaymentNumber());
             ResponseEntity<Map> responseGet = getMidtrans(midtransUrl);
 
@@ -120,12 +118,14 @@ public class PaymentServiceImplementation implements PaymentService {
         String transactionStatus = (String) payload.get("transaction_status");
 
         Optional<PaymentEntity> existingPayment = paymentRepository.findByPaymentNumber(orderId);
+        if (existingPayment.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(PAYMENT_NOT_FOUND));
 
         if (existingPayment.isPresent()) {
             PaymentEntity paymentEntity = existingPayment.get();
 
             if (transactionStatus.equals("settlement")){
                 List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(existingPayment.get().getUserEmail(), existingPayment.get().getPaymentNumber(), false, false);
+                if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
                 for (CartEntity updateCart : cartEntities){
                     updateCart.setIsPayed(true);
                     updateCart.setCartUpdatedDate(new Date());
@@ -138,6 +138,7 @@ public class PaymentServiceImplementation implements PaymentService {
 
             if (transactionStatus.equals("expire")){
                 List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(existingPayment.get().getUserEmail(), existingPayment.get().getPaymentNumber(),false, false);
+                if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
                 for (CartEntity updateCart : cartEntities){
                     updateCart.setIsFailed(true);
                     updateCart.setCartUpdatedDate(new Date());
@@ -162,75 +163,17 @@ public class PaymentServiceImplementation implements PaymentService {
     }
 
     @Override
-    public RestApiResponse<List<PaymentSaveResult>> getUnfinishedPayment(String userRole, String userEmail, String status) {
-
-        List<String> errors = new ArrayList<>();
+    public RestApiResponse<List<PaymentSaveResult>> getPayment(String userRole, String userEmail) {
 
         try {
-            if (!userRole.equals("Customer")) errors.add(PAYMENT_ROLE_WRONG);
-
-            List<PaymentEntity> paymentEntities = paymentRepository.findPaymentByEmailAndStatus(userEmail, status);
-            if (paymentEntities.isEmpty()) errors.add(PAYMENT_NOT_FOUND);
-
-            List<PaymentSaveResult> results = new ArrayList<>();
-
-            for (PaymentEntity getPayment : paymentEntities) {
-                List<CartEntity> cartEntities = cartRepository.findByUserEmailAndPaymentNumber(
-                        userEmail,
-                        getPayment.getPaymentNumber(),false, false
-                );
-
-                if (cartEntities.isEmpty()) {
-                    errors.add(CART_NOT_FOUND);
-                    continue;
-                }
-
-                Integer totalPrice = 0;
-                List<PaymentProductSaved> savedProduct = new ArrayList<>();
-
-                for (CartEntity getCart : cartEntities) {
-                    PaymentProductSaved product = new PaymentProductSaved();
-                    product.setProductQuantity(getCart.getCartQuantity().toString());
-                    product.setProductName(getCart.getProductName());
-                    product.setCartTotalPricePerItem(getCart.getCartTotalPrice().toString());
-                    totalPrice += getCart.getCartTotalPrice();
-                    savedProduct.add(product);
-                }
-
-                PaymentSaveResult result = getPayment(getPayment, totalPrice);
-                result.setProduct(savedProduct);
-                results.add(result);
-            }
-
-            if (!errors.isEmpty()) {
-                throw new CustomIllegalArgumentException("Validation Error", errors);
-            }
-
-            return RestApiResponse.<List<PaymentSaveResult>>builder()
-                    .code(AUDIT_GET_ACTION)
-                    .message(AUDIT_GET_DESC_ACTION_SUCCESS)
-                    .data(results)
-                    .build();
-
-        } catch (CustomIllegalArgumentException e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public RestApiResponse<List<PaymentSaveResult>> getFinishedPayment(String userRole, String userEmail) {
-
-        List<String> errors = new ArrayList<>();
-
-        try {
-            if (!userRole.equals("Customer")) errors.add(PAYMENT_ROLE_WRONG);
+            if (!userRole.equals("Customer")) throw new UnauthorizedException(PAYMENT_ROLE_WRONG);
 
             List<PaymentEntity> allPayments = paymentRepository.findPaymentByEmail(userEmail);
-            if (allPayments.isEmpty()) errors.add(PAYMENT_NOT_FOUND);
+            if (allPayments.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(PAYMENT_NOT_FOUND));
 
             List<PaymentEntity> paymentEntities = allPayments.stream()
                     .filter(p -> p.getPaymentStatus().equalsIgnoreCase("settlement") ||
-                            p.getPaymentStatus().equalsIgnoreCase("expire"))
+                            p.getPaymentStatus().equalsIgnoreCase("expire") || p.getPaymentStatus().equalsIgnoreCase("pending"))
                     .collect(Collectors.toList());
 
             List<PaymentSaveResult> results = new ArrayList<>();
@@ -242,14 +185,16 @@ public class PaymentServiceImplementation implements PaymentService {
                 List<CartEntity> cartEntities;
                 if (getPayment.getPaymentStatus().equalsIgnoreCase("settlement")) {
                     cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), true, false);
-                } else {
+                    if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
+                } else if (getPayment.getPaymentStatus().equalsIgnoreCase("expire")){
                     cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), false, true);
+                    if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
+                } else {
+                    cartEntities = cartRepository.findByUserEmailAndPaymentNumber(userEmail, getPayment.getPaymentNumber(), false, false);
+                    if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
                 }
 
-                if (cartEntities.isEmpty()) {
-                    errors.add(CART_NOT_FOUND);
-                    continue;
-                }
+                if (cartEntities.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
 
                 Integer totalPrice = 0;
                 List<PaymentProductSaved> savedProduct = new ArrayList<>();
@@ -265,10 +210,6 @@ public class PaymentServiceImplementation implements PaymentService {
                 PaymentSaveResult result = getPayment(getPayment, totalPrice);
                 result.setProduct(savedProduct);
                 results.add(result);
-            }
-
-            if (!errors.isEmpty()) {
-                throw new CustomIllegalArgumentException("Validation Error", errors);
             }
 
             return RestApiResponse.<List<PaymentSaveResult>>builder()
@@ -332,6 +273,7 @@ public class PaymentServiceImplementation implements PaymentService {
                 .paymentStatus(createPayment.getPaymentStatus())
                 .paymentType(createPayment.getPaymentType())
                 .cartTotalPrice(createPayment.getPaymentPrice())
+                .paymentPrice(createPayment.getPaymentPrice())
                 .paymentStartDate(createPayment.getPaymentStartDate())
                 .paymentEndDate(createPayment.getPaymentEndDate())
                 .paymentThirdParty(response)
