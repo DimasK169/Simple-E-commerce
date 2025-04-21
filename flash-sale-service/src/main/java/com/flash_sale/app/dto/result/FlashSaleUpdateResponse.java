@@ -37,10 +37,10 @@ public class FlashSaleUpdateResponse {
     private String productImage;
 
     @JsonProperty("FlashSale_StartDate")
-    private Date fsStartDate;
+    private LocalDateTime fsStartDate;
 
     @JsonProperty("FlashSale_EndDate")
-    private Date  fsEndDate;
+    private LocalDateTime  fsEndDate;
 
     @JsonProperty("FlashSale_CreatedBy")
     private String fsCreatedBy;
