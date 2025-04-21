@@ -22,8 +22,8 @@ public class FlashSale {
     private String fsName;
     private String fsCode;
     private String fsProduct;
-    private Date  fsStartDate;
-    private Date fsEndDate;
+    private LocalDateTime  fsStartDate;
+    private LocalDateTime fsEndDate;
     private String fsCreatedBy;
     private Date fsCreatedDate;
     private Date fsUpdateDate;
