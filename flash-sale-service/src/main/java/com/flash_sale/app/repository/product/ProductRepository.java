@@ -12,5 +12,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("Select p from Product p where p.productCode=:productCode")
     List<Product> findByproductCode(String productCode);
-    boolean existsByProductCode(String productCode);
 }
