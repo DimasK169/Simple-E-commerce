@@ -19,7 +19,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/auth/**", "/images/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/product", "/product/search", "/{productCode}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/product", "/product/search", "/product/{productCode}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);

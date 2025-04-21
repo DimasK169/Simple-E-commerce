@@ -22,25 +22,6 @@ public class ProductRepositoryTest {
     @Autowired
     private ProductRepository productRepository;
 
-//    @BeforeEach
-//    void setUp() {
-//        Product product1 = Product.builder()
-//                .productCode("P001")
-//                .productName("Laptop")
-//                .productCategory("Electronics")
-//                .productIsDelete(false)
-//                .build();
-//
-//        Product product2 = Product.builder()
-//                .productCode("P002")
-//                .productName("Headphones")
-//                .productCategory("Electronics")
-//                .productIsDelete(true)
-//                .build();
-//
-//        productRepository.save(product1);
-//        productRepository.save(product2);
-//    }
 
     @Test
     public void ProductRepository_SaveAll_ReturnSavedProduct(){

@@ -19,9 +19,9 @@ public interface ProductService {
     RestApiResponse<ProductCreateResponse> create(ProductRequest request, MultipartFile imageFile) throws IOException;
     RestApiResponse<ProductUpdateResponse> update(ProductUpdateRequest request, String productCode, MultipartFile imageFile) throws IOException;
     RestApiResponse<ProductUpdateResponse> delete(String productCode) throws JsonProcessingException;
-    RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(int page, int size);
-    RestApiResponse<Page<ProductUpdateResponse>> searchProducts(String keyword, Pageable pageable);
-    RestApiResponse<ProductUpdateResponse> getbyCode(String productCode);
-    RestApiResponse<Page<ProductUpdateResponse>> searchProductsAdmin(String keyword, Pageable pageable);
+    RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(int page, int size) throws JsonProcessingException;
+    RestApiResponse<Page<ProductUpdateResponse>> searchProducts(String keyword, Pageable pageable) throws JsonProcessingException;
+    RestApiResponse<ProductUpdateResponse> getbyCode(String productCode) throws JsonProcessingException;
+    RestApiResponse<Page<ProductUpdateResponse>> searchProductsAdmin(String keyword, Pageable pageable) throws JsonProcessingException;
     Product getProductCode(String productCode);
 }

@@ -124,7 +124,7 @@ public class ProductServiceImplement implements ProductService {
 
         ProductUpdateResponse result = ProductUpdateResponse.builder()
                 .productName(saveProduct.getProductName())
-                .productImage(baseUrl + "/images/" + saveProduct.getProductImage()) // ✅ Return URL
+                .productImage(baseUrl + "/images/" + saveProduct.getProductImage())
                 .productDescription(saveProduct.getProductDescription())
                 .productCategory(saveProduct.getProductCategory())
                 .productStock(saveProduct.getProductStock())
@@ -177,7 +177,7 @@ public class ProductServiceImplement implements ProductService {
         return response;
     }
 
-    public RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(int page, int size) {
+    public RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(int page, int size) throws JsonProcessingException {
         Page<Product> pageData = productRepository.findAllByProductIsDeleteFalse(PageRequest.of(page, size));
 
         Page<ProductUpdateResponse> responsePage = pageData.map(product -> {
@@ -195,6 +195,14 @@ public class ProductServiceImplement implements ProductService {
             return response;
         });
 
+        auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
+                .AtAction("Delete")
+                .AtDescription("Delete Product")
+                .AtDate(new Date())
+                .AtRequest("Request page: " + page +  "size : " + size)
+                .AtResponse(String.valueOf(responsePage))
+                .build());
+
         return RestApiResponse.<Page<ProductUpdateResponse>>builder()
                 .code("200")
                 .message("Products retrieved successfully")
@@ -203,7 +211,7 @@ public class ProductServiceImplement implements ProductService {
     }
 
 
-    public RestApiResponse<Page<ProductUpdateResponse>> searchProducts(String keyword, Pageable pageable) {
+    public RestApiResponse<Page<ProductUpdateResponse>> searchProducts(String keyword, Pageable pageable) throws JsonProcessingException {
         Page<Product> pageData = productRepository.searchByNameOrCategory(keyword, pageable);
 
         Page<ProductUpdateResponse> responsePage = pageData.map(product -> {
@@ -223,6 +231,14 @@ public class ProductServiceImplement implements ProductService {
             return response;
         });
 
+        auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
+                .AtAction("Delete")
+                .AtDescription("Delete Product")
+                .AtDate(new Date())
+                .AtRequest("Request keyword: " + keyword)
+                .AtResponse(String.valueOf(responsePage))
+                .build());
+
         return RestApiResponse.<Page<ProductUpdateResponse>>builder()
                 .code("200")
                 .message("Products retrieved successfully")
@@ -230,7 +246,7 @@ public class ProductServiceImplement implements ProductService {
                 .build();
     }
 
-    public RestApiResponse<Page<ProductUpdateResponse>> searchProductsAdmin(String keyword, Pageable pageable) {
+    public RestApiResponse<Page<ProductUpdateResponse>> searchProductsAdmin(String keyword, Pageable pageable) throws JsonProcessingException {
         Page<Product> pageData = productRepository.searchByNameOrCategoryForAdmin(keyword, pageable);
 
         Page<ProductUpdateResponse> responsePage = pageData.map(product -> {
@@ -249,6 +265,13 @@ public class ProductServiceImplement implements ProductService {
             response.setUpdatedDate(product.getUpdatedDate());
             return response;
         });
+        auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
+                .AtAction("Delete")
+                .AtDescription("Delete Product")
+                .AtDate(new Date())
+                .AtRequest("Request keyword: " + keyword)
+                .AtResponse(String.valueOf(responsePage))
+                .build());
 
         return RestApiResponse.<Page<ProductUpdateResponse>>builder()
                 .code("200")
@@ -258,7 +281,7 @@ public class ProductServiceImplement implements ProductService {
     }
 
     @Override
-    public RestApiResponse<ProductUpdateResponse> getbyCode(String productCode) {
+    public RestApiResponse<ProductUpdateResponse> getbyCode(String productCode) throws JsonProcessingException {
         Product product = getProductCode(productCode);
         if(product == null){
             throw new IllegalArgumentException("Invalid product Name");
@@ -274,7 +297,18 @@ public class ProductServiceImplement implements ProductService {
                 .productIsAvailable(product.getProductIsAvailable())
                 .productIsDelete(product.getProductIsDelete())
                 .productStock(product.getProductStock())
+                .createdBy(product.getCreatedBy())
+                .createdDate(product.getCreatedDate())
+                .updatedDate(product.getUpdatedDate())
                 .build();
+
+        auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
+                .AtAction("Delete")
+                .AtDescription("Delete Product")
+                .AtDate(new Date())
+                .AtRequest("Get by product code: " + productCode)
+                .AtResponse(String.valueOf(productResponse))
+                .build());
 
         return RestApiResponse.<ProductUpdateResponse>builder()
                 .code("200")
