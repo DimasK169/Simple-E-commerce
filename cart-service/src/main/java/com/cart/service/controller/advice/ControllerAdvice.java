@@ -3,6 +3,7 @@ package com.cart.service.controller.advice;
 import com.cart.service.dto.response.RestApiError;
 import com.cart.service.dto.response.RestApiResponse;
 import com.cart.service.exception.CustomIllegalArgumentException;
+import com.cart.service.exception.UnauthorizedException;
 import com.cart.service.utility.CoreThrowHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,5 +71,14 @@ public class ControllerAdvice {
         response.put("errors", ex.getErrors());
         response.put("timestamp", LocalDateTime.now());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Object> handleUnauthorizeException(UnauthorizedException ex){
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", HttpStatus.UNAUTHORIZED.value());
+        response.put("message", ex.getMessage());
+        response.put("timestamp", LocalDateTime.now());
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 }
