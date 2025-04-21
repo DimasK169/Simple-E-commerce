@@ -177,7 +177,6 @@ public class ProductServiceImplement implements ProductService {
         return response;
     }
 
-    //TODO keamanan jika frontend minta 1000 size
     public RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(int page, int size) {
         Page<Product> pageData = productRepository.findAllByProductIsDeleteFalse(PageRequest.of(page, size));
 
@@ -217,8 +216,37 @@ public class ProductServiceImplement implements ProductService {
             response.setProductStock(product.getProductStock());
             response.setProductPrice(product.getProductPrice());
             response.setProductIsAvailable(product.getProductIsAvailable());
+            response.setProductIsDelete(product.getProductIsDelete());
             response.setCreatedBy(product.getCreatedBy());
             response.setCreatedDate(product.getCreatedDate());
+            response.setUpdatedDate(product.getUpdatedDate());
+            return response;
+        });
+
+        return RestApiResponse.<Page<ProductUpdateResponse>>builder()
+                .code("200")
+                .message("Products retrieved successfully")
+                .data(responsePage)
+                .build();
+    }
+
+    public RestApiResponse<Page<ProductUpdateResponse>> searchProductsAdmin(String keyword, Pageable pageable) {
+        Page<Product> pageData = productRepository.searchByNameOrCategoryForAdmin(keyword, pageable);
+
+        Page<ProductUpdateResponse> responsePage = pageData.map(product -> {
+            ProductUpdateResponse response = new ProductUpdateResponse();
+            response.setProductName(product.getProductName());
+            response.setProductCode(product.getProductCode());
+            response.setProductImage(baseUrl + "/images/" + product.getProductImage());
+            response.setProductDescription(product.getProductDescription());
+            response.setProductCategory(product.getProductCategory());
+            response.setProductStock(product.getProductStock());
+            response.setProductPrice(product.getProductPrice());
+            response.setProductIsAvailable(product.getProductIsAvailable());
+            response.setProductIsDelete(product.getProductIsDelete());
+            response.setCreatedBy(product.getCreatedBy());
+            response.setCreatedDate(product.getCreatedDate());
+            response.setUpdatedDate(product.getUpdatedDate());
             return response;
         });
 

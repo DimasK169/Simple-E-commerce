@@ -96,4 +96,12 @@ public class ProductController {
         return productService.searchProducts(keyword, PageRequest.of(page, size));
     }
 
+    @GetMapping("/searchAdmin")
+    public RestApiResponse<Page<ProductUpdateResponse>> searchProductsAdmin(
+            @Valid @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return productService.searchProductsAdmin(keyword, PageRequest.of(page, size));
+    }
+
 }
