@@ -36,7 +36,7 @@ public class PaymentController {
     }
 
     @GetMapping("")
-    public RestApiResponse<List<PaymentSaveResult>> getFinishedPayment(HttpServletRequest request){
+    public RestApiResponse<List<PaymentSaveResult>> getPayment(HttpServletRequest request){
         return paymentServiceImplementation.getPayment((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"));
     }
 }
