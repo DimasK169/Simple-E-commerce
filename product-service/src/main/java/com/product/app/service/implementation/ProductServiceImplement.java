@@ -77,7 +77,7 @@ public class ProductServiceImplement implements ProductService {
 
         RestApiResponse<ProductCreateResponse> response = new RestApiResponse<>();
         response.setData(results);
-        response.setCode(HttpStatus.OK.toString());
+        response.setCode(HttpStatus.CREATED.toString());
         response.setMessage("Berhasil Membuat Produk");
 
         auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
