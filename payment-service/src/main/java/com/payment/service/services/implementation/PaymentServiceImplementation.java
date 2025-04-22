@@ -117,6 +117,8 @@ public class PaymentServiceImplementation implements PaymentService {
         String orderId = (String) payload.get("order_id");
         String transactionStatus = (String) payload.get("transaction_status");
 
+        System.out.println(orderId);
+
         Optional<PaymentEntity> existingPayment = paymentRepository.findByPaymentNumber(orderId);
         if (existingPayment.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(PAYMENT_NOT_FOUND));
 

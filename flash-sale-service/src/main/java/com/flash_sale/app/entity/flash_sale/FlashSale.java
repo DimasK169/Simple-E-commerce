@@ -21,6 +21,7 @@ public class FlashSale {
     private Long fsId;
     private String fsName;
     private String fsCode;
+    private String productCode;
     private String fsProduct;
     private Date  fsStartDate;
     private Date fsEndDate;
