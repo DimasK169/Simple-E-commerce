@@ -273,7 +273,6 @@ public class PaymentServiceImplementation implements PaymentService {
                 .paymentStatus(createPayment.getPaymentStatus())
                 .paymentType(createPayment.getPaymentType())
                 .cartTotalPrice(createPayment.getPaymentPrice())
-                .paymentPrice(createPayment.getPaymentPrice())
                 .paymentStartDate(createPayment.getPaymentStartDate())
                 .paymentEndDate(createPayment.getPaymentEndDate())
                 .paymentThirdParty(response)

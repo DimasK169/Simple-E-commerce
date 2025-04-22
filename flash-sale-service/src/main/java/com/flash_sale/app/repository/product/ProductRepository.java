@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query("Select p from Product p where p.productCode=:productCode")
+    @Query("Select p from Product p where p.productCode=:productCode and p.productIsDelete=false")
     List<Product> findByproductCode(String productCode);
     boolean existsByProductCode(String productCode);
 }
