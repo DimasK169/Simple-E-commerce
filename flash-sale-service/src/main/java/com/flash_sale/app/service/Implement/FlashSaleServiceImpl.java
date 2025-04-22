@@ -120,6 +120,14 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     public RestApiResponse<List<FlashSaleUpdateResponse>> updateFlashSale(FlashSaleUpdateRequest request, String fsCode) throws JsonProcessingException {
         List<FlashSaleUpdateResponse> responseList = new ArrayList<>();
 
+        if (fsCode.isEmpty()) {
+            throw new IllegalArgumentException("Flash sale code is empty");
+        }
+
+        List<FlashSale> flashSaleExist = flashSaleRepository.findByFsCode(fsCode);
+        if (flashSaleExist.isEmpty()) {
+            throw new IllegalArgumentException("Flash sale code not found in the database: " + fsCode);
+        }
         for (String productCode : request.getProductCode()) {
             List<Product> productList = productRepository.findByproductCode(productCode);
             if (productList.isEmpty()) {
