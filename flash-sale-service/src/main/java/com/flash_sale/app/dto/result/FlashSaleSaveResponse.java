@@ -23,10 +23,10 @@ public class FlashSaleSaveResponse {
     private String fsProduct;
 
     @JsonProperty("FlashSale_StartDate")
-    private LocalDateTime fsStartDate;
+    private Date fsStartDate;
 
     @JsonProperty("FlashSale_EndDate")
-    private LocalDateTime   fsEndDate;
+    private Date   fsEndDate;
 
     @JsonProperty("FlashSale_Discount")
     private Double trxDiscount;
