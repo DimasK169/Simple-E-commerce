@@ -11,7 +11,9 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +27,7 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public RestApiResponse<ProductCreateResponse> createProduct(
+    public ResponseEntity<RestApiResponse<ProductCreateResponse>> createProduct(
             @Valid @RequestParam("name") String productName,
             @Valid @RequestParam("code") String productCode,
             @Valid @RequestParam("description") String productDescription,
@@ -36,7 +38,6 @@ public class ProductController {
             @Valid @RequestParam("createdBy") String createdBy,
             @RequestParam("image") MultipartFile imageFile
     ) throws IOException {
-
         ProductRequest productRequest = ProductRequest.builder()
                 .productName(productName)
                 .productCode(productCode)
@@ -47,11 +48,12 @@ public class ProductController {
                 .productIsAvailable(productAvailable)
                 .createdBy(createdBy)
                 .build();
-        return productService.create(productRequest, imageFile);
+        RestApiResponse<ProductCreateResponse> response = productService.create(productRequest, imageFile);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{productCode}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public RestApiResponse<ProductUpdateResponse> updateProduct(
+    public ResponseEntity<RestApiResponse<ProductUpdateResponse>> updateProduct(
             @PathVariable String productCode,
             @Valid @RequestParam("name") String productName,
             @Valid @RequestParam("description") String productDescription,
@@ -70,38 +72,46 @@ public class ProductController {
                 .productIsAvailable(productAvailable)
                 .build();
 
-        return productService.update(productRequest, productCode, imageFile);
+        RestApiResponse<ProductUpdateResponse> response = productService.update(productRequest, productCode, imageFile);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/{productCode}")
-    public RestApiResponse<ProductUpdateResponse> getProductbyCode(@PathVariable String productCode) throws JsonProcessingException{
-        return productService.getbyCode(productCode);
+    public ResponseEntity<RestApiResponse<ProductUpdateResponse>> getProductbyCode(@PathVariable String productCode) throws JsonProcessingException{
+        RestApiResponse<ProductUpdateResponse> response = productService.getbyCode(productCode);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/{productCode}")
-    public RestApiResponse<ProductUpdateResponse> deleteProduct(@PathVariable String productCode) throws JsonProcessingException {
-        return productService.delete(productCode);
+    public ResponseEntity<RestApiResponse<ProductUpdateResponse>> deleteProduct(@PathVariable String productCode) throws JsonProcessingException {
+        RestApiResponse<ProductUpdateResponse> response = productService.delete(productCode);
+        return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
     }
 
     @GetMapping
-    public RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) throws JsonProcessingException{
-        return productService.getAllProducts(page, size);
+    public ResponseEntity<RestApiResponse<Page<ProductUpdateResponse>>> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) throws JsonProcessingException{
+        RestApiResponse<Page<ProductUpdateResponse>> response = productService.getAllProducts(page, size);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/search")
-    public RestApiResponse<Page<ProductUpdateResponse>> searchProducts(
+    public ResponseEntity<RestApiResponse<Page<ProductUpdateResponse>>> searchProducts(
             @Valid @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws JsonProcessingException{
-        return productService.searchProducts(keyword, PageRequest.of(page, size));
+        RestApiResponse<Page<ProductUpdateResponse>> response = productService.searchProducts(keyword, PageRequest.of(page, size));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/searchAdmin")
-    public RestApiResponse<Page<ProductUpdateResponse>> searchProductsAdmin(
+    public ResponseEntity<RestApiResponse<Page<ProductUpdateResponse>>> searchProductsAdmin(
             @Valid @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) throws JsonProcessingException{
-        return productService.searchProductsAdmin(keyword, PageRequest.of(page, size));
+        RestApiResponse<Page<ProductUpdateResponse>> response = productService.searchProductsAdmin(keyword, PageRequest.of(page, size));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

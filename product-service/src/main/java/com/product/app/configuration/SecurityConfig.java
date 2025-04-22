@@ -1,6 +1,8 @@
 package com.product.app.configuration;
 
+import com.product.app.security.CustomAuthEntryPoint;
 import com.product.app.security.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,10 +15,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private CustomAuthEntryPoint customAuthEntryPoint; 
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+
         http
+
                 .csrf(csrf -> csrf.disable())
+                .exceptionHandling(e -> e.authenticationEntryPoint(customAuthEntryPoint))
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/product", "/product/search", "/product/{productCode}").permitAll()
@@ -25,6 +34,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
 
     @Bean
     public JwtAuthFilter jwtAuthFilter() {

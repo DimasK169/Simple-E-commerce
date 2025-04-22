@@ -1,8 +1,8 @@
-package com.product.app.repository.product;
+package com.product.app.repository;
 
 import com.product.app.entity.product.Product;
+import com.product.app.repository.product.ProductRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
@@ -21,6 +21,7 @@ public class ProductRepositoryTest {
 
     @Autowired
     private ProductRepository productRepository;
+
 
 
     @Test
@@ -102,11 +103,28 @@ public class ProductRepositoryTest {
                 .productName("Laptop")
                 .productCategory("Electronics")
                 .productIsDelete(false)
+                .productIsAvailable(true)
                 .build();
 
         productRepository.save(test);
 
         Page<Product> result = productRepository.searchByNameOrCategory("laptop", PageRequest.of(0, 10));
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Laptop", result.getContent().get(0).getProductName());
+    }
+
+    @Test
+    void testSearchByNameOrCategoryForAdmin() {
+        Product test = Product.builder()
+                .productCode("P001")
+                .productName("Laptop")
+                .productCategory("Electronics")
+                .productIsDelete(false)
+                .build();
+
+        productRepository.save(test);
+
+        Page<Product> result = productRepository.searchByNameOrCategoryForAdmin("laptop", PageRequest.of(0, 10));
         assertEquals(1, result.getTotalElements());
         assertEquals("Laptop", result.getContent().get(0).getProductName());
     }
