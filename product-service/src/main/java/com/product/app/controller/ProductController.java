@@ -74,7 +74,7 @@ public class ProductController {
     }
 
     @GetMapping("/{productCode}")
-    public RestApiResponse<ProductUpdateResponse> getProductbyCode(@PathVariable String productCode){
+    public RestApiResponse<ProductUpdateResponse> getProductbyCode(@PathVariable String productCode) throws JsonProcessingException{
         return productService.getbyCode(productCode);
     }
 
@@ -84,7 +84,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    public RestApiResponse<Page<ProductUpdateResponse>> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) throws JsonProcessingException{
         return productService.getAllProducts(page, size);
     }
 
@@ -92,7 +92,7 @@ public class ProductController {
     public RestApiResponse<Page<ProductUpdateResponse>> searchProducts(
             @Valid @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size) throws JsonProcessingException{
         return productService.searchProducts(keyword, PageRequest.of(page, size));
     }
 
@@ -100,7 +100,7 @@ public class ProductController {
     public RestApiResponse<Page<ProductUpdateResponse>> searchProductsAdmin(
             @Valid @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size) throws JsonProcessingException{
         return productService.searchProductsAdmin(keyword, PageRequest.of(page, size));
     }
 

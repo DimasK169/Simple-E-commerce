@@ -246,29 +246,30 @@ public class FlashSaleServiceImpl implements FlashSaleService {
             List<TrxFlashSale> trxList = trxFlashSaleRepository.findByFsId(flashSale.getFsId());
 
             for (TrxFlashSale trx : trxList) {
-                Optional<Product> productOpt = productRepository.findById(trx.getProductId());
-                if (productOpt.isEmpty()) continue;
+                List<Product> products = productRepository.findByproductCode(trx.getProductCode());
+                for (Product getProduct : products){
+                    if (getProduct.equals("") || getProduct.equals(null)) continue;
 
-                Product product = productOpt.get();
+                    FlashSaleUpdateResponse response = FlashSaleUpdateResponse.builder()
+                            .fsName(flashSale.getFsName())
+                            .fsCode(flashSale.getFsCode())
+                            .fsProduct(flashSale.getFsProduct())
+                            .productCode(trx.getProductCode())
+                            .fsStartDate(flashSale.getFsStartDate())
+                            .fsEndDate(flashSale.getFsEndDate())
+                            .fsCreatedBy(flashSale.getFsCreatedBy())
+                            .fsUpdateDate(flashSale.getFsUpdateDate())
+                            .fsIsDelete(flashSale.getFsIsDelete())
+                            .trxDiscount(trx.getTrxDiscount())
+                            .trxPrice(trx.getTrxPrice())
+                            .productPrice(getProduct.getProductPrice())
+                            .productImage(baseUrl + "/images/" + getProduct.getProductImage())
+                            .status("Fetched")
+                            .build();
 
-                FlashSaleUpdateResponse response = FlashSaleUpdateResponse.builder()
-                        .fsName(flashSale.getFsName())
-                        .fsCode(flashSale.getFsCode())
-                        .fsProduct(flashSale.getFsProduct())
-                        .productCode(trx.getProductCode())
-                        .fsStartDate(flashSale.getFsStartDate())
-                        .fsEndDate(flashSale.getFsEndDate())
-                        .fsCreatedBy(flashSale.getFsCreatedBy())
-                        .fsUpdateDate(flashSale.getFsUpdateDate())
-                        .fsIsDelete(flashSale.getFsIsDelete())
-                        .trxDiscount(trx.getTrxDiscount())
-                        .trxPrice(trx.getTrxPrice())
-                        .productPrice(product.getProductPrice())
-                        .productImage(baseUrl + "/images/" + product.getProductImage())
-                        .status("Fetched")
-                        .build();
+                    responseList.add(response);
 
-                responseList.add(response);
+                }
 
                 auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
                         .AtAction("Get")
@@ -345,7 +346,6 @@ public class FlashSaleServiceImpl implements FlashSaleService {
 
     public RestApiResponse<Map<String, String>> getActiveFlashSaleCodeResponse() {
         Optional<String> fsCode = flashSaleRepository.findActiveFlashSaleCode();
-
         if (fsCode.isPresent()) {
             return RestApiResponse.<Map<String, String>>builder()
                     .code("200 OK")

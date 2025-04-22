@@ -30,9 +30,6 @@ public class PaymentSaveResult<T> {
     @JsonProperty("Payment_Type")
     private String paymentType;
 
-    @JsonProperty("Payment_Price")
-    private Integer paymentPrice;
-
     @JsonProperty("Product")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<PaymentProductSaved> product;
