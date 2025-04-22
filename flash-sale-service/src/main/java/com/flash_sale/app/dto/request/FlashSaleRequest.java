@@ -29,11 +29,11 @@ public class FlashSaleRequest {
 
     @JsonProperty("FlashSale_StartDate")
     @NotNull(message = "Flash sale start date cannot be empty")
-    private LocalDateTime fsStartDate;
+    private Date fsStartDate;
 
     @JsonProperty("FlashSale_EndDate")
     @NotNull(message = "Flash sale end date cannot be empty")
-    private LocalDateTime   fsEndDate;
+    private Date   fsEndDate;
 
     @JsonProperty("FlashSale_CreatedBy")
     private String fsCreatedBy;
