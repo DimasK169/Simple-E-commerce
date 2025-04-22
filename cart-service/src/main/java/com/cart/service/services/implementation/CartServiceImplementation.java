@@ -59,6 +59,8 @@ public class CartServiceImplementation implements CartService {
 
         try {
 
+            System.out.println(cartRequest);
+
             if (!userRole.equals("Customer")) throw new UnauthorizedException(CART_NOT_FOUND);
 
             Optional<Product> product = productRepository.findProductByCode(cartRequest.getProductCode());
@@ -69,12 +71,16 @@ public class CartServiceImplementation implements CartService {
             if (user.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(USER_NOT_FOUND));
             Users existingUser = user.get();
 
-            Optional<CartEntity> existingCart = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber(
+            System.out.println(existingUser.getUserEmail() + " " + existingProduct.getProductCode());
+            Optional<CartEntity> cart = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber(
                     existingUser.getUserEmail(), existingProduct.getProductCode(), "N/A", false, false);
-
+            System.out.println(cart);
             //Melakukan penyaringan jika cart telah ada di dalam tabel
-            if (existingCart.isPresent()) {
-                throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_MESSAGE_ALREADY_ADDED));
+            if (cart.isPresent()) {
+                CartEntity existingCart = cart.get();
+                int updatedQuantity = existingCart.getCartQuantity() + 1;
+                cartRequest.setCartQuantity(updatedQuantity);
+                return updateQuantityCart(userRole, userEmail, cartRequest);
             }
 
             CartEntity cartEntity = createCartEntity(cartRequest, existingUser, existingProduct);
@@ -86,11 +92,11 @@ public class CartServiceImplementation implements CartService {
                 Optional<TrxFlashSale> trxFlashSale = trxFlashSaleRepository.findByFsCodeAndProductCode(
                         cartRequest.getFsCode(), cartRequest.getProductCode());
                 if (trxFlashSale.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(FLASHSALE_NOT_FOUND));
+                TrxFlashSale trx = trxFlashSale.get();
 
+                System.out.println(cartRequest.getFsCode() + cartRequest.getProductCode());
                 Optional<FlashSale> flashSale = flashSaleRepository.findByFsCodeAndProductCode(cartRequest.getFsCode(), cartRequest.getProductCode());
                 if (trxFlashSale.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(TRXFLASHSALE_NOT_FOUND));
-
-                TrxFlashSale trx = trxFlashSale.get();
                 FlashSale fs = flashSale.get();
 
                 if (dateNow.before(fs.getFsStartDate()) || dateNow.after(fs.getFsEndDate())) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(FLASHSALE_TIMEOUT));
@@ -132,49 +138,57 @@ public class CartServiceImplementation implements CartService {
 
             if (!userRole.equals("Customer")) throw new UnauthorizedException(CART_MESSAGE_WRONG_ROLE);
 
-
+            System.out.println(userEmail + " " + cartRequest.getProductCode());
             Optional<CartEntity> cart = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber(userEmail, cartRequest.getProductCode(), "N/A", false, false);
             if (cart.isEmpty()) {
                 throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
             } else {
 
+                System.out.println(cart);
+
                 Optional<Product> product = productRepository.findProductByCode(cartRequest.getProductCode());
                 if(product.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(PRODUCT_NOT_FOUND));
                 Product existingProduct = product.get();
 
-                if (cartRequest.getFsCode() == null || cartRequest.getFsCode().isEmpty() || !cartRequest.getFsCode().equals(cart.get().getFsCode())) {
-                    throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
-                }
-
-                Optional<FlashSale> flashSale = flashSaleRepository.findByFsCodeAndProductCode(cart.get().getFsCode(), cart.get().getProductCode());
-                if (flashSale.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(FLASHSALE_NOT_FOUND));
-                FlashSale fs = flashSale.get();
-
-                Optional<TrxFlashSale> trxFlashSale = trxFlashSaleRepository.findByFsCodeAndProductCode(cart.get().getFsCode(), cart.get().getProductCode());
-                if (trxFlashSale.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(TRXFLASHSALE_NOT_FOUND));
-                TrxFlashSale trx = trxFlashSale.get();
-
                 CartEntity updateCart = cart.get();
-                updateCart.setCartQuantity(cartRequest.getCartQuantity());
+                int oldQuantity = updateCart.getCartQuantity();
+                int newQuantity = cartRequest.getCartQuantity();
+                int quantityDiff = newQuantity - oldQuantity;
 
-                if (cartRequest.getFsCode() != null && !cartRequest.getFsCode().isEmpty()){
+                updateCart.setCartQuantity(newQuantity);
+
+                if (cartRequest.getFsCode() != null && !cartRequest.getFsCode().isEmpty()) {
+                    Optional<FlashSale> flashSale = flashSaleRepository.findByFsCodeAndProductCode(cart.get().getFsCode(), cart.get().getProductCode());
+                    if (flashSale.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(FLASHSALE_NOT_FOUND));
+                    FlashSale fs = flashSale.get();
+
+                    Optional<TrxFlashSale> trxFlashSale = trxFlashSaleRepository.findByFsCodeAndProductCode(cart.get().getFsCode(), cart.get().getProductCode());
+                    if (trxFlashSale.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(TRXFLASHSALE_NOT_FOUND));
+                    TrxFlashSale trx = trxFlashSale.get();
+
                     Instant now = Instant.now();
                     Date dateNow = Date.from(now);
 
-
-                    if (updateCart.getFsCode().equals(flashSale.get().getFsCode())){
-                        if (dateNow.before(fs.getFsStartDate()) || dateNow.after(fs.getFsEndDate())){
+                    if (updateCart.getFsCode().equals(fs.getFsCode())) {
+                        if (dateNow.before(fs.getFsStartDate()) || dateNow.after(fs.getFsEndDate())) {
                             throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(FLASHSALE_TIMEOUT));
                         } else {
                             updateCart.setCartTotalPrice(trx.getTrxPrice() * cartRequest.getCartQuantity());
                         }
+                    } else {
+                        updateCart.setCartTotalPrice(existingProduct.getProductPrice() * cartRequest.getCartQuantity());
                     }
+                } else {
+                    updateCart.setCartTotalPrice(existingProduct.getProductPrice() * cartRequest.getCartQuantity());
                 }
-                updateCart.setCartTotalPrice(existingProduct.getProductPrice() * cartRequest.getCartQuantity());
+
                 updateCart.setCartUpdatedDate(new Date());
                 CartEntity updatedCart = cartRepository.save(updateCart);
-                Integer updateStock = existingProduct.getProductStock() - 1;
-                existingProduct.setProductStock(updateStock);
+                int newStock = existingProduct.getProductStock() - quantityDiff;
+                if (newStock < 0) {
+                    throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList("Stok tidak mencukupi"));
+                }
+                existingProduct.setProductStock(newStock);
                 productRepository.save(existingProduct);
 
                 CartSaveResult result = buildCartSaveResult(updatedCart);
@@ -255,6 +269,14 @@ public class CartServiceImplementation implements CartService {
                 totalPrice += getCart.getCartTotalPrice();
 
                 CartGetResult resultAudit = buildCartGetResult(getCart, getProduct);
+
+                if (getCart.getFsCode() != null && !getCart.getFsCode().isEmpty()){
+                    Optional<TrxFlashSale> trxFlashSale = trxFlashSaleRepository.findByFsCodeAndProductCode(getCart.getFsCode(), getCart.getProductCode());
+                    if (trxFlashSale.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(TRXFLASHSALE_NOT_FOUND));
+
+                    resultAudit.setProductPrice(trxFlashSale.get().getTrxPrice());
+                }
+
                 result.add(resultAudit);
 
                 insertAuditTrail(null , resultAudit, AUDIT_GET_DESC_ACTION_SUCCESS ,AUDIT_GET_ACTION);
