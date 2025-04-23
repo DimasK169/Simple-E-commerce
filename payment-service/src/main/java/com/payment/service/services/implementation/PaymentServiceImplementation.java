@@ -239,7 +239,7 @@ public class PaymentServiceImplementation implements PaymentService {
                 .build();
     }
 
-    private ResponseEntity<Map> postMidtrans(String type, String orderId, Integer totalPrice){
+    public ResponseEntity<Map> postMidtrans(String type, String orderId, Integer totalPrice){
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Basic " + encodeServerKey());
         headers.set("Content-Type", "application/json");
@@ -257,7 +257,7 @@ public class PaymentServiceImplementation implements PaymentService {
         return response;
     }
 
-    private ResponseEntity<Map> getMidtrans(String url){
+    public ResponseEntity<Map> getMidtrans(String url){
         HttpHeaders headersGet = new HttpHeaders();
         String encodedAuth = Base64.getEncoder().encodeToString((midtransKey + ":").getBytes());
         headersGet.set("Authorization", "Basic " + encodedAuth);

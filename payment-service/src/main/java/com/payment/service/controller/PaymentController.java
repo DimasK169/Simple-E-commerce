@@ -31,12 +31,12 @@ public class PaymentController {
     }
 
     @PostMapping(PAYMENT_WEBHOOK_API_PATH)
-    public String handleMidtransWebhook(HttpServletRequest request, @RequestBody Map<String, Object> payload) {
-        return paymentServiceImplementation.updatePaymentStatus(payload);
+    public String handleMidtransWebhook(@RequestBody Map<String, Object> payload) {
+        return paymentService.updatePaymentStatus(payload);
     }
 
     @GetMapping("")
     public RestApiResponse<List<PaymentSaveResult>> getPayment(HttpServletRequest request){
-        return paymentServiceImplementation.getPayment((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"));
+        return paymentService.getPayment((String) request.getAttribute("userRole"), (String) request.getAttribute("userEmail"));
     }
 }
