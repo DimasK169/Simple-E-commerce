@@ -210,6 +210,72 @@ public class ProductServiceImplement implements ProductService {
                 .build();
     }
 
+    public RestApiResponse<Page<ProductUpdateResponse>> getAllProductsCustomer(int page, int size) throws JsonProcessingException {
+        Page<Product> pageData = productRepository.findByProductCustomer(PageRequest.of(page, size));
+
+        Page<ProductUpdateResponse> responsePage = pageData.map(product -> {
+            ProductUpdateResponse response = new ProductUpdateResponse();
+            response.setProductName(product.getProductName());
+            response.setProductCode(product.getProductCode());
+            response.setProductImage(baseUrl + "/images/" + product.getProductImage());
+            response.setProductDescription(product.getProductDescription());
+            response.setProductCategory(product.getProductCategory());
+            response.setProductStock(product.getProductStock());
+            response.setProductPrice(product.getProductPrice());
+            response.setProductIsAvailable(product.getProductIsAvailable());
+            response.setCreatedBy(product.getCreatedBy());
+            response.setCreatedDate(product.getCreatedDate());
+            return response;
+        });
+
+        auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
+                .AtAction("Delete")
+                .AtDescription("Delete Product")
+                .AtDate(new Date())
+                .AtRequest("Request page: " + page +  "size : " + size)
+                .AtResponse(String.valueOf(responsePage))
+                .build());
+
+        return RestApiResponse.<Page<ProductUpdateResponse>>builder()
+                .code("200")
+                .message("Products retrieved successfully")
+                .data(responsePage)
+                .build();
+    }
+
+
+    public RestApiResponse<Page<ProductUpdateResponse>> getAllProductsAdmin(int page, int size) throws JsonProcessingException {
+        Page<Product> pageData = productRepository.findByProductAdmin(PageRequest.of(page, size));
+
+        Page<ProductUpdateResponse> responsePage = pageData.map(product -> {
+            ProductUpdateResponse response = new ProductUpdateResponse();
+            response.setProductName(product.getProductName());
+            response.setProductCode(product.getProductCode());
+            response.setProductImage(baseUrl + "/images/" + product.getProductImage());
+            response.setProductDescription(product.getProductDescription());
+            response.setProductCategory(product.getProductCategory());
+            response.setProductStock(product.getProductStock());
+            response.setProductPrice(product.getProductPrice());
+            response.setProductIsAvailable(product.getProductIsAvailable());
+            response.setCreatedBy(product.getCreatedBy());
+            response.setCreatedDate(product.getCreatedDate());
+            return response;
+        });
+
+        auditTrailsService.saveAuditTrails(AuditTrailsRequest.builder()
+                .AtAction("Delete")
+                .AtDescription("Delete Product")
+                .AtDate(new Date())
+                .AtRequest("Request page: " + page +  "size : " + size)
+                .AtResponse(String.valueOf(responsePage))
+                .build());
+
+        return RestApiResponse.<Page<ProductUpdateResponse>>builder()
+                .code("200")
+                .message("Products retrieved successfully")
+                .data(responsePage)
+                .build();
+    }
 
     public RestApiResponse<Page<ProductUpdateResponse>> searchProducts(String keyword, Pageable pageable) throws JsonProcessingException {
         Page<Product> pageData = productRepository.searchByNameOrCategory(keyword, pageable);
