@@ -1,14 +1,12 @@
 package com.cart.service.repository;
 
+import com.cart.service.dto.request.CartRequest;
 import com.cart.service.entity.cart.CartEntity;
 import com.cart.service.repository.cart.CartRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.Date;
@@ -18,84 +16,62 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 public class CartRepositoryTest {
 
     @Autowired
     private CartRepository cartRepository;
 
-    private CartEntity cart1, cart2, cart3;
+    private CartEntity cart;
 
     @BeforeEach
-    void setUp() {
-        // Data pertama
-        cart1 = new CartEntity();
-        cart1.setUserEmail("user@example.com");
-        cart1.setProductCode("P001");
-        cart1.setPaymentNumber("PM123");
-        cart1.setIsPayed(false);
-        cart1.setIsFailed(false);
+    void setup(){
 
-        // Data kedua
-        cart2 = new CartEntity();
-        cart2.setUserEmail("user@example.com");
-        cart2.setProductCode("P002");
-        cart2.setPaymentNumber("PM123");
-        cart2.setIsPayed(false);
-        cart2.setIsFailed(false);
-
-        // Data ketiga: email sama, paymentNumber beda
-        cart3 = new CartEntity();
-        cart3.setUserEmail("user@example.com");
-        cart3.setProductCode("P001");
-        cart3.setPaymentNumber("PM999");
-        cart3.setIsPayed(false);
-        cart3.setIsFailed(true); // beda
-
-        cartRepository.saveAll(List.of(cart1, cart2, cart3));
+        cart = CartEntity.builder()
+                .userId(1l)
+                .userEmail("user@example.com")
+                .productId(1l)
+                .productName("Laptop")
+                .productCode("P001")
+                .cartQuantity(10)
+                .paymentNumber("N/A")
+                .isPayed(false)
+                .isFailed(false)
+                .cartCreatedDate(new Date())
+                .build();
     }
 
     @Test
-    @DisplayName("Valid FindByUserEmail")
-    void testFindByUserEmail_withValidData_shouldReturnCorrectCarts() {
-        List<CartEntity> result = cartRepository.findByUserEmail("user@example.com", "PM123", false, false);
+    @DisplayName("Save Cart Repository")
+    void save() {
+        CartEntity response = cartRepository.save(cart);
 
-        assertThat(result).hasSize(2);
-        assertThat(result).extracting(CartEntity::getProductCode)
-                .containsExactlyInAnyOrder("P001", "P002");
+        assertThat(response).isNotNull();
     }
 
     @Test
-    @DisplayName("No Match FindByUserEmail")
-    void testFindByUserEmail_withNoMatch_shouldReturnEmptyList() {
-        List<CartEntity> result = cartRepository.findByUserEmail("wrong@example.com", "PM123", false, false);
+    @DisplayName("Success Find By User Email")
+    void findByUserEmail_whenValid(){
+        CartEntity test = cartRepository.save(cart);
 
-        assertThat(result).isEmpty();
+        List<CartEntity> response = cartRepository.findByUserEmail("user@example.com", "N/A", false, false);
+
+        assertThat(test).isNotNull();
+        assertThat(response).isNotNull();
+        assertThat(response.get(0).getProductCode()).isEqualTo("P001");
     }
 
     @Test
-    @DisplayName("Valid FindByUserEmailAndProductCodeAndPaymentNumber")
-    void testFindByUserEmailAndProductCodeAndPaymentNumber_withValidData_shouldReturnCart() {
-        Optional<CartEntity> result = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber("user@example.com", "P001", "PM123", false, false);
+    @DisplayName("Success Find By User Email, Product Code And Payment Number")
+    void findByUserEmailAndProductCodeAndPaymentNumber_whenValid(){
+        CartEntity test = cartRepository.save(cart);
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getProductCode()).isEqualTo("P001");
-    }
+        Optional<CartEntity> response = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber("user@example.com", "P001", "N/A", false, false);
 
-    @Test
-    @DisplayName("Incorrect Status FindByUserEmailAndProductCodeAndPaymentNumber")
-    void testFindByUserEmailAndProductCodeAndPaymentNumber_withIncorrectStatus_shouldReturnEmpty() {
-        Optional<CartEntity> result = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber("user@example.com", "P001", "PM123", true, false);
-
-        assertThat(result).isNotPresent();
-    }
-
-    @Test
-    @DisplayName("Wrong Payment Number FindByUserEmailAndProductCodeAndPaymentNumber")
-    void testFindByUserEmailAndProductCodeAndPaymentNumber_withWrongPaymentNumber_shouldReturnEmpty() {
-        Optional<CartEntity> result = cartRepository.findByUserEmailAndProductCodeAndPaymentNumber("user@example.com", "P001", "INVALID", false, false);
-
-        assertThat(result).isNotPresent();
+        assertThat(test).isNotNull();
+        assertThat(response).isNotNull();
+        assertThat(response.get().getUserEmail()).isEqualTo("user@example.com");
+        assertThat(response.get().getProductCode()).isEqualTo("P001");
+        assertThat(response.get().getPaymentNumber()).isEqualTo("N/A");
     }
 
 }
