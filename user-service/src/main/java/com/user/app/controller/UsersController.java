@@ -27,7 +27,7 @@ public class UsersController {
     private AuthService authService;
 
     @PostMapping("/save")
-    public RestApiResponse<UsersSaveResponse> createFlashSale(@Valid @RequestBody UsersRequest usersRequest){
+    public RestApiResponse<UsersSaveResponse> createUser(@Valid @RequestBody UsersRequest usersRequest){
         return usersService.saveUsers(usersRequest);
     }
 
