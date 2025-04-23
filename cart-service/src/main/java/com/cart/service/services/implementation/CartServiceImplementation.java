@@ -20,6 +20,7 @@ import com.cart.service.dto.result.CartSaveResult;
 import com.cart.service.entity.cart.CartEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import com.cart.service.repository.cart.CartRepository;
@@ -53,6 +54,9 @@ public class CartServiceImplementation implements CartService {
 
     @Autowired
     AuditTrailsService auditTrailsService;
+
+    @Value("${images.baseUrl}")
+    private String baseUrl;
 
     @Override
     public RestApiResponse<CartSaveResult> addToCart(String userRole, String userEmail, CartRequest cartRequest) throws JsonProcessingException {
@@ -329,7 +333,7 @@ public class CartServiceImplementation implements CartService {
         return CartGetResult.builder()
                 .productName(cart.getProductName())
                 .productDesc(product.getProductDescription())
-                .productImage(product.getProductImage())
+                .productImage(baseUrl + "images/" + product.getProductImage())
                 .productPrice(product.getProductPrice())
                 .cartTotalPricePerItem(cart.getCartTotalPrice())
                 .cartQuantity(cart.getCartQuantity())
