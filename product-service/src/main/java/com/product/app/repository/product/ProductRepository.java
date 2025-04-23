@@ -17,6 +17,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> searchByNameOrCategory(@Param("keyword") String keyword, Pageable pageable);
     @Query("SELECT p FROM Product p WHERE (LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.productCategory) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND p.productIsDelete = false")
     Page<Product> searchByNameOrCategoryForAdmin(@Param("keyword") String keyword, Pageable pageable);
+    @Query("SELECT p FROM Product p WhERE p.productIsDelete = false AND p.productIsAvailable = true")
+    Page<Product> findByProductCustomer(Pageable pageable);
+    @Query("SELECT p FROM Product p WhERE p.productIsDelete = false")
+    Page<Product> findByProductAdmin(Pageable pageable);
     boolean existsByProductCode(String productCode);
     Page<Product> findAllByProductIsDeleteFalse(Pageable pageable);
 }

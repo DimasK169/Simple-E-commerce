@@ -96,6 +96,22 @@ public class ProductController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping ("/getForCustomer")
+    public ResponseEntity<RestApiResponse<Page<ProductUpdateResponse>>> getAllProductsCustomer(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) throws JsonProcessingException{
+        RestApiResponse<Page<ProductUpdateResponse>> response = productService.getAllProductsCustomer(page, size);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping ("/getForAdmin")
+    public ResponseEntity<RestApiResponse<Page<ProductUpdateResponse>>> getAllProductsAdmin(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) throws JsonProcessingException{
+        RestApiResponse<Page<ProductUpdateResponse>> response = productService.getAllProductsAdmin(page, size);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @GetMapping("/search")
     public ResponseEntity<RestApiResponse<Page<ProductUpdateResponse>>> searchProducts(
             @Valid @RequestParam String keyword,
