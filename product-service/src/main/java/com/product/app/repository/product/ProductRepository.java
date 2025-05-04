@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("Select p from Product p where p.productCode=:productCode")
@@ -23,4 +25,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByProductAdmin(Pageable pageable);
     boolean existsByProductCode(String productCode);
     Page<Product> findAllByProductIsDeleteFalse(Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE p.productCode NOT IN :productCode and p.productIsDelete = false")
+    Page<Product> findProductsByCodes(@Param("productCode") List<String> productCode, Pageable pageable);
 }
