@@ -19,4 +19,11 @@ public class GeneralConstant {
     public static final String USER_ENTITY_MANAGER_FACTORY = "usersEntityManagerFactory";
     public static final String USER_TRANSACTION_MANAGER = "usersTransactionManager";
 
+    //Config Untuk Flash Sale
+    public static final String FLASHSALE_DATASOURCE_PATH = "spring.datasource.flash-sale";
+    public static final String FLASHSALE_REPOSITORY = "com.product.app.repository.flashsale";
+    public static final String FLASHSALE_ENTITY = "com.product.app.entity.flashsale";
+    public static final String FLASHSALE_DATA_SOURCE = "fsDataSource";
+    public static final String FLASHSALE_ENTITY_MANAGER_FACTORY = "fsEntityManagerFactory";
+    public static final String FLASHSALE_TRANSACTION_MANAGER = "fsTransactionManager";
 }

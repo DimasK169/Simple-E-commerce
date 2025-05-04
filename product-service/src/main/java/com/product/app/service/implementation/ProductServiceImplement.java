@@ -7,7 +7,11 @@ import com.product.app.dto.request.ProductUpdateRequest;
 import com.product.app.dto.response.RestApiResponse;
 import com.product.app.dto.result.ProductCreateResponse;
 import com.product.app.dto.result.ProductUpdateResponse;
+import com.product.app.entity.flashsale.FlashSale;
+import com.product.app.entity.flashsale.TrxFlashSale;
 import com.product.app.entity.product.Product;
+import com.product.app.repository.flashsale.FlashSaleRepository;
+import com.product.app.repository.flashsale.TrxFlashSaleRepository;
 import com.product.app.repository.product.ProductRepository;
 import com.product.app.service.interfacing.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +25,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductServiceImplement implements ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private TrxFlashSaleRepository trxFlashSaleRepository;
+
+    @Autowired
+    private FlashSaleRepository flashSaleRepository;
 
     @Autowired
     private AuditTrailsServiceImp auditTrailsService;
@@ -99,6 +111,10 @@ public class ProductServiceImplement implements ProductService {
             throw new IllegalArgumentException("Invalid Product Code");
         }
 
+        Optional<TrxFlashSale> flashSale = trxFlashSaleRepository.findByProductCode(p.getProductCode());
+        if (flashSale.isEmpty()) throw new IllegalArgumentException("Flash Sale Is Not Found");
+        TrxFlashSale existingFs = flashSale.get();
+
         String savedFileName = p.getProductImage();
         if (imageFile != null && !imageFile.isEmpty()) {
             savedFileName = fileStorageService.storeFile(imageFile);
@@ -120,7 +136,12 @@ public class ProductServiceImplement implements ProductService {
                 .createdBy(p.getCreatedBy())
                 .build();
 
+        double updateFsPrice = request.getProductPrice() * flashSale.get().getTrxDiscount();
+
+        existingFs.setTrxPrice((int)(updateFsPrice));
+
         Product saveProduct = productRepository.save(product);
+        TrxFlashSale saveFlashSale = trxFlashSaleRepository.save(existingFs);
 
         ProductUpdateResponse result = ProductUpdateResponse.builder()
                 .productName(saveProduct.getProductName())
@@ -211,7 +232,10 @@ public class ProductServiceImplement implements ProductService {
     }
 
     public RestApiResponse<Page<ProductUpdateResponse>> getAllProductsCustomer(int page, int size) throws JsonProcessingException {
-        Page<Product> pageData = productRepository.findByProductCustomer(PageRequest.of(page, size));
+        List<String> flashSale = flashSaleRepository.findActiveFlashSaleCode();
+        if (flashSale == null) throw new IllegalArgumentException("Flash Sale Not Found");
+
+        Page<Product> pageData = productRepository.findProductsByCodes(flashSale, PageRequest.of(page, size));
 
         Page<ProductUpdateResponse> responsePage = pageData.map(product -> {
             ProductUpdateResponse response = new ProductUpdateResponse();
