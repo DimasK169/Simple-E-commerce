@@ -117,6 +117,9 @@ public class CartServiceImplementation implements CartService {
 
             Integer updateStock = existingProduct.getProductStock() - cartRequest.getCartQuantity();
             existingProduct.setProductStock(updateStock);
+            if (updateStock == 0){
+                existingProduct.setProductIsAvailable(false);
+            }
             productRepository.save(existingProduct);
 
             insertAuditTrail(cartRequest, result, AUDIT_CREATE_DESC_ACTION_SUCCESS, AUDIT_CREATE_ACTION);
@@ -147,8 +150,6 @@ public class CartServiceImplementation implements CartService {
             if (cart.isEmpty()) {
                 throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(CART_NOT_FOUND));
             } else {
-
-                System.out.println(cart);
 
                 Optional<Product> product = productRepository.findProductByCode(cartRequest.getProductCode());
                 if(product.isEmpty()) throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList(PRODUCT_NOT_FOUND));
@@ -189,6 +190,11 @@ public class CartServiceImplementation implements CartService {
                 updateCart.setCartUpdatedDate(new Date());
                 CartEntity updatedCart = cartRepository.save(updateCart);
                 int newStock = existingProduct.getProductStock() - quantityDiff;
+                if (newStock == 0){
+                    existingProduct.setProductIsAvailable(false);
+                } else {
+                    existingProduct.setProductIsAvailable(true);
+                }
                 if (newStock < 0) {
                     throw new CustomIllegalArgumentException("Validation Error", Collections.singletonList("Stok tidak mencukupi"));
                 }
@@ -234,6 +240,7 @@ public class CartServiceImplementation implements CartService {
 
             Integer updateStock = existingProduct.getProductStock() + existingCart.getCartQuantity();
             existingProduct.setProductStock(updateStock);
+            existingProduct.setProductIsAvailable(true);
             productRepository.save(existingProduct);
 
             cartRepository.delete(cart.get());
@@ -337,6 +344,7 @@ public class CartServiceImplementation implements CartService {
                 .productPrice(product.getProductPrice())
                 .cartTotalPricePerItem(cart.getCartTotalPrice())
                 .cartQuantity(cart.getCartQuantity())
+                .productStock(product.getProductStock())
                 .fsCode(cart.getFsCode())
                 .productCode(cart.getProductCode())
                 .createdDate(new Date())

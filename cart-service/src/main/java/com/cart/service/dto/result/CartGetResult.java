@@ -43,6 +43,10 @@ public class CartGetResult {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Integer cartQuantity;
 
+    @JsonProperty("Product_Quantity")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Integer productStock;
+
     @JsonProperty("Product_Image")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String productImage;
